@@ -10,32 +10,23 @@ import android.provider.Settings
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 
-private val IMAGE_CLIPBOARD_IME_PACKAGES = setOf(
-	"com.google.android.inputmethod.latin",
-)
-
-// Android exposes no standard IME flag for image clipboard support; unknown keyboards fail closed.
-internal fun supportsImageClipboard(activity: Activity): Boolean =
-	activeInputMethodPackage(activity) in IMAGE_CLIPBOARD_IME_PACKAGES
-
 internal suspend fun copyImageToClipboard(
 	activity: Activity,
 	url: String,
 	fileName: String,
 ): ImageTransferResult {
 	val imePackage = activeInputMethodPackage(activity)
-	check(imePackage in IMAGE_CLIPBOARD_IME_PACKAGES) {
-		"Image clipboard is not supported by the selected keyboard"
-	}
 
 	val image = fetchImage(url)
 	val uri = saveImageToPictures(activity, fileName, image)
 	try {
-		activity.grantUriPermission(
-			imePackage,
-			uri,
-			Intent.FLAG_GRANT_READ_URI_PERMISSION,
-		)
+		imePackage?.let {
+			activity.grantUriPermission(
+				it,
+				uri,
+				Intent.FLAG_GRANT_READ_URI_PERMISSION,
+			)
+		}
 		suspendCancellableCoroutine<Unit> { continuation ->
 			activity.runOnUiThread {
 				try {
@@ -52,11 +43,13 @@ internal suspend fun copyImageToClipboard(
 			}
 		}
 	} catch (error: Throwable) {
-		activity.revokeUriPermission(
-			imePackage,
-			uri,
-			Intent.FLAG_GRANT_READ_URI_PERMISSION,
-		)
+		imePackage?.let {
+			activity.revokeUriPermission(
+				it,
+				uri,
+				Intent.FLAG_GRANT_READ_URI_PERMISSION,
+			)
+		}
 		activity.contentResolver.delete(uri, null, null)
 		throw error
 	}
