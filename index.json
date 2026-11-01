@@ -1,0 +1,59 @@
+{
+  "format": 1,
+  "name": "kmmiio99o Plugins Repository",
+  "description": "kmmiio99o plugin repository from Valenced.",
+  "plugins": {
+    "dev.kmmiio99o.cloud.sync": {
+      "name": "CloudSync",
+      "description": "Sync and back up your plugins, themes, and settings to the cloud.",
+      "author": "kmmiio99o <879393496627306587> (https://github.com/sponsors/kmmiio99o \"Donations\") (https://kmmiio99o.dev \"Website\") (https://github.com/kmmiio99o \"GitHub\") (https://toasts.val.kmmiio99o.dev/ \"Documentation\")",
+      "icon": "CloudIcon",
+      "channels": {
+        "latest": "1.0.0"
+      },
+      "versions": {
+        "1.0.0": {
+          "url": "https://kmmiio99o.github.io/valenced-plugins/pool/dev.kmmiio99o.cloud.sync@1.0.0.zip",
+          "sha256": "24986b5da1cd6b4f7ed2ee56ce9bec0efdcb4b3d819758390e0d57f147b451f6",
+          "size": 23132,
+          "dependencies": {
+            "valenced.api": {
+              "version": ">=1 <2"
+            },
+            "discord": {
+              "version": "*"
+            },
+            "rosie.toast-api": {
+              "version": "*",
+              "optional": true
+            }
+          }
+        }
+      }
+    },
+    "dev.kmmiio99o.expression-utils": {
+      "name": "Expression Utils",
+      "description": "Adds useful actions to custom emoji and sticker sheets, including cloning expressions to servers you manage.",
+      "author": "kmmiio99o <879393496627306587> (https://github.com/sponsors/kmmiio99o \"Donations\") (https://kmmiio99o.dev \"Website\") (https://github.com/kmmiio99o \"GitHub\") (https://toasts.val.kmmiio99o.dev/ \"Documentation\")",
+      "icon": "EmojiSmilingFacewithHeartsIcon",
+      "channels": {
+        "latest": "1.0.0"
+      },
+      "versions": {
+        "1.0.0": {
+          "url": "https://kmmiio99o.github.io/valenced-plugins/pool/dev.kmmiio99o.expression-utils@1.0.0.zip",
+          "sha256": "0cc4cf839c1afe26b7414fb51a01d18be2f0f4c72ac7e52c9c5fcfb897973f22",
+          "size": 26652,
+          "dependencies": {
+            "valenced.api": {
+              "version": ">=1 <2"
+            },
+            "discord": {
+              "version": "*"
+            }
+          }
+        }
+      }
+    }
+  }
+}
