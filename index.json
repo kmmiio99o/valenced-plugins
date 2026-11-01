@@ -37,7 +37,7 @@
       "author": "kmmiio99o <879393496627306587> (https://github.com/sponsors/kmmiio99o \"Donations\") (https://kmmiio99o.dev \"Website\") (https://github.com/kmmiio99o \"GitHub\")",
       "icon": "EmojiSmilingFacewithHeartsIcon",
       "channels": {
-        "latest": "1.0.1"
+        "latest": "1.0.2"
       },
       "versions": {
         "1.0.0": {
@@ -57,6 +57,19 @@
           "url": "https://kmmiio99o.github.io/valenced-plugins/pool/dev.kmmiio99o.expression-utils@1.0.1.zip",
           "sha256": "a43e89a2868a0625a1f91a916871d869d0b5339b0f057c402af6ab12eef09b49",
           "size": 26756,
+          "dependencies": {
+            "valenced.api": {
+              "version": ">=1 <2"
+            },
+            "discord": {
+              "version": "*"
+            }
+          }
+        },
+        "1.0.2": {
+          "url": "https://kmmiio99o.github.io/valenced-plugins/pool/dev.kmmiio99o.expression-utils@1.0.2.zip",
+          "sha256": "c9bd44a619ebf0f6ba215b6ce2600e87568a2b8b945c8e822ff10610a67c6a17",
+          "size": 26132,
           "dependencies": {
             "valenced.api": {
               "version": ">=1 <2"
