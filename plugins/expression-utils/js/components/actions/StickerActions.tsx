@@ -4,7 +4,6 @@ import { StickerFormat } from '../../types'
 import { copyStickerAsImage, downloadSticker } from '../../utils/imageActions'
 import { showToast } from '../../utils/toasts'
 import { openExpressionStealer } from '../ExpressionStealerActionSheet'
-import ImageClipboardButton from './ImageClipboardButton'
 import type { StickerNode } from '../../types'
 
 function useFavoriteSticker(stickerId: string) {
@@ -60,7 +59,8 @@ export default function StickerActions({ sticker }: { sticker: StickerNode }) {
 						text="Download as image"
 						onPress={() => void downloadSticker(sticker)}
 					/>
-					<ImageClipboardButton
+					<Button
+						text="Copy as image"
 						onPress={() => void copyStickerAsImage(sticker)}
 					/>
 				</>

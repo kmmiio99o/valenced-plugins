@@ -3,7 +3,6 @@ import { Clipboard } from '@valenced/externals/react-native-clipboard'
 import { copyAsImage, downloadEmoji } from '../../utils/imageActions'
 import { showToast } from '../../utils/toasts'
 import { openExpressionStealer } from '../ExpressionStealerActionSheet'
-import ImageClipboardButton from './ImageClipboardButton'
 import type { EmojiNode } from '../../types'
 
 export default function EmojiActions({ emoji }: { emoji: EmojiNode }) {
@@ -36,7 +35,8 @@ export default function EmojiActions({ emoji }: { emoji: EmojiNode }) {
 				text="Download as image"
 				onPress={() => void downloadEmoji(emoji)}
 			/>
-			<ImageClipboardButton
+			<Button
+				text="Copy as image"
 				onPress={() =>
 					void copyAsImage(
 						emoji.src,

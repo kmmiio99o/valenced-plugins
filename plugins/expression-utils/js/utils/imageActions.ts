@@ -16,7 +16,10 @@ async function copyImageAction(resolve: () => ImageRequest) {
 	try {
 		const { url, fileName } = resolve()
 		await copyImage(url, fileName)
-		showToast('EXPRESSION_UTILS_COPY_IMAGE', 'Image copied to clipboard.')
+		showToast(
+			'EXPRESSION_UTILS_COPY_IMAGE',
+			'Image copied',
+		)
 	} catch (error) {
 		showToast(
 			'EXPRESSION_UTILS_COPY_IMAGE',

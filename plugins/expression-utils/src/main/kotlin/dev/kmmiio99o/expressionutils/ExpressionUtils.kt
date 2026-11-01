@@ -18,10 +18,6 @@ val expressionUtils = plugin {
 	start {
 		storagePermission.install()
 
-		registerNativeAsyncMethod("${manifest.id}.supportsImageClipboard") {
-			supportsImageClipboard(awaitAppActivity())
-		}
-
 		registerNativeAsyncMethod("${manifest.id}.copyImage") { args ->
 			val (url, fileName) = args.toImageArgs()
 			val activity = awaitAppActivity()
