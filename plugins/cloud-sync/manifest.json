@@ -12,10 +12,6 @@
 		},
 		"discord": {
 			"version": "*"
-		},
-		"rosie.toast-api": {
-			"version": "*",
-			"optional": true
 		}
 	},
 	"dist": {
