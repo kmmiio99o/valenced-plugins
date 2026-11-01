@@ -1,0 +1,28 @@
+{
+	"format": 1,
+	"id": "dev.kmmiio99o.cloud.sync",
+	"name": "CloudSync",
+	"description": "Sync and back up your plugins, themes, and settings to the cloud.",
+	"author": "kmmiio99o <879393496627306587> (https://github.com/sponsors/kmmiio99o \"Donations\") (https://kmmiio99o.dev \"Website\") (https://github.com/kmmiio99o \"GitHub\") (https://toasts.val.kmmiio99o.dev/ \"Documentation\")",
+	"icon": "CloudIcon",
+	"version": "1.0.0",
+	"dependencies": {
+		"valenced.api": {
+			"version": ">=1 <2"
+		},
+		"discord": {
+			"version": "*"
+		},
+		"rosie.toast-api": {
+			"version": "*",
+			"optional": true
+		}
+	},
+	"dist": {
+		"script": "index.js",
+		"android": {
+			"path": "plugin.jar",
+			"class": "dev.kmmiio99o.cloudsync.CloudSync"
+		}
+	}
+}
