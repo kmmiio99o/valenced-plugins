@@ -5,7 +5,7 @@
 	"description": "Adds useful actions to custom emoji and sticker sheets, including cloning expressions to servers you manage.",
 	"author": "kmmiio99o <879393496627306587> (https://github.com/sponsors/kmmiio99o \"Donations\") (https://kmmiio99o.dev \"Website\") (https://github.com/kmmiio99o \"GitHub\")",
 	"icon": "EmojiSmilingFacewithHeartsIcon",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"dependencies": {
 		"valenced.api": {
 			"version": ">=1 <2"
