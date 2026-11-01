@@ -54,6 +54,33 @@
           }
         }
       }
+    },
+    "dev.kmmiio99o.song-spotlight": {
+      "name": "Song Spotlight",
+      "description": "Show songs on your Discord profile, with previews and link sharing.",
+      "author": "kmmiio99o <879393496627306587> (https://github.com/kmmiio99o \"GitHub\")",
+      "contributors": [
+        "nexpid <853550207039832084> (https://github.com/nexpid/RevengePlugins \"Original plugin\")"
+      ],
+      "icon": "MusicIcon",
+      "channels": {
+        "latest": "1.0.0"
+      },
+      "versions": {
+        "1.0.0": {
+          "url": "https://kmmiio99o.github.io/valenced-plugins/pool/dev.kmmiio99o.song-spotlight@1.0.0.zip",
+          "sha256": "5b6782459091ea9e70654b63f8c27ebbf274b49a1f6f0eff1288455b37d106f6",
+          "size": 12133,
+          "dependencies": {
+            "valenced.api": {
+              "version": ">=1 <2"
+            },
+            "discord": {
+              "version": "*"
+            }
+          }
+        }
+      }
     }
   }
 }
