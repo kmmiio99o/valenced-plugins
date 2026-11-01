@@ -3,6 +3,7 @@ import { Design } from '@valenced/discord/design'
 import { BottomSheet as Gorhom } from '@valenced/externals/gorhom'
 import { useState } from 'react'
 import { View } from 'react-native'
+import { initializeEmojiSlotUtils } from '../common'
 import { getGuilds, ServerRow } from './stealer/ServerRows'
 import { expressionName } from './stealer/types'
 import type { CloneableExpression } from './stealer/types'
@@ -62,6 +63,7 @@ function ExpressionStealer({
 }
 
 export function openExpressionStealer(expression: CloneableExpression) {
+	if (expression.kind === 'emoji') initializeEmojiSlotUtils()
 	ActionSheetActionCreators.openLazy(
 		Promise.resolve({
 			default: () => <ExpressionStealer expression={expression} />,
