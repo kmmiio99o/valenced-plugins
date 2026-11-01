@@ -1,5 +1,6 @@
-import { getModules } from '@valenced/modules/finders'
-import { withProps } from '@valenced/modules/finders/filters'
+import { lookupModuleWithImportedPath } from '@valenced/discord/utils/modules/finders'
+import { getModules, lookupModule } from '@valenced/modules/finders'
+import { withDependencies, withProps } from '@valenced/modules/finders/filters'
 import type { Guild, StickerNode } from './types'
 
 interface StickerActions {
@@ -53,6 +54,19 @@ export const modules: {
 	}
 	stickerDetailSheet?: StickerDetailSheet
 } = {}
+
+export function initializeEmojiSlotUtils() {
+	if (modules.emojiSlotUtils) return
+	const [, guildStoreId] = lookupModuleWithImportedPath('stores/GuildStore.tsx')
+	const [, userStoreId] = lookupModuleWithImportedPath('stores/UserStore.tsx')
+	if (guildStoreId === undefined || userStoreId === undefined) return
+	const [slotUtils] = lookupModule(
+		withDependencies(
+			withDependencies.unordered([guildStoreId, userStoreId]),
+		).and(withProps<EmojiSlotUtils>('getMaxEmojiSlots')),
+	)
+	if (slotUtils) modules.emojiSlotUtils = slotUtils
+}
 
 export function findExpressionModules() {
 	return [
