@@ -3,12 +3,12 @@
 	"id": "dev.kmmiio99o.song-spotlight",
 	"name": "Song Spotlight",
 	"description": "Show songs on your Discord profile, with previews and link sharing.",
-	"author": "kmmiio99o <879393496627306587> (https://github.com/kmmiio99o \"GitHub\")",
+	"author": "kmmiio99o <879393496627306587> (https://github.com/sponsors/kmmiio99o \"Donations\") (https://kmmiio99o.dev \"Website\") (https://github.com/kmmiio99o \"GitHub\")",
 	"contributors": [
 		"nexpid <853550207039832084> (https://github.com/nexpid/RevengePlugins \"Original plugin\")"
 	],
 	"icon": "MusicIcon",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"dependencies": {
 		"valenced.api": {
 			"version": ">=1 <2"
