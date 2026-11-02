@@ -9,6 +9,14 @@ import type { AuthToken, Song, SongSpotlightSettings, UserData } from '../types'
 
 export { parseLink, renderSong, validateSong }
 
+interface CachedUserData {
+	data: UserData
+	lastModified?: string
+}
+
+const userDataCache = new Map<string, CachedUserData>()
+const userDataRequests = new Map<string, Promise<UserData>>()
+
 export function getHost(settings?: Partial<SongSpotlightSettings>) {
 	const host = settings?.host?.trim() || DEFAULT_HOST
 	const url = new URL(host)
@@ -20,6 +28,23 @@ export function getHost(settings?: Partial<SongSpotlightSettings>) {
 	if (url.protocol !== 'https:' && !(local && url.protocol === 'http:'))
 		throw new Error('The server URL must use HTTPS.')
 	return `${url.href.replace(/\/+$/, '')}/`
+}
+
+function userDataCacheKey(host: string, path: string, token: AuthToken) {
+	return `${host}${path}${token.refresh}`
+}
+
+export function getCachedUserData(
+	hostValue: string,
+	userId: string,
+	isCurrentUser: boolean,
+	token: AuthToken,
+) {
+	const host = getHost({ host: hostValue })
+	const path = isCurrentUser
+		? 'api/data'
+		: `api/data/${encodeURIComponent(userId)}`
+	return userDataCache.get(userDataCacheKey(host, path, token))?.data
 }
 
 async function responseError(response: Response) {
@@ -71,14 +96,12 @@ export async function listData(
 	updateToken: (token: AuthToken) => void | Promise<void>,
 ): Promise<UserData> {
 	const host = getHost({ host: hostValue })
-	const response = await authorizedFetch(
+	return fetchUserData(
 		host,
 		`api/data/${encodeURIComponent(userId)}`,
 		token,
 		updateToken,
 	)
-	if (!response.ok) throw await responseError(response)
-	return (await response.json()) as UserData
 }
 
 export async function getData(
@@ -87,9 +110,46 @@ export async function getData(
 	updateToken: (token: AuthToken) => void | Promise<void>,
 ): Promise<UserData> {
 	const host = getHost({ host: hostValue })
-	const response = await authorizedFetch(host, 'api/data', token, updateToken)
-	if (!response.ok) throw await responseError(response)
-	return (await response.json()) as UserData
+	return fetchUserData(host, 'api/data', token, updateToken)
+}
+
+async function fetchUserData(
+	host: string,
+	path: string,
+	token: AuthToken,
+	updateToken: (token: AuthToken) => void | Promise<void>,
+) {
+	const key = userDataCacheKey(host, path, token)
+	const pending = userDataRequests.get(key)
+	if (pending) return pending
+
+	const request = (async () => {
+		const cached = userDataCache.get(key)
+		const response = await authorizedFetch(
+			host,
+			path,
+			token,
+			updateToken,
+			cached?.lastModified
+				? { headers: { 'if-modified-since': cached.lastModified } }
+				: undefined,
+		)
+		if (response.status === 304 && cached) return cached.data
+		if (!response.ok) throw await responseError(response)
+
+		const data = (await response.json()) as UserData
+		userDataCache.set(key, {
+			data,
+			lastModified: response.headers.get('last-modified') ?? undefined,
+		})
+		return data
+	})()
+	userDataRequests.set(key, request)
+	try {
+		return await request
+	} finally {
+		userDataRequests.delete(key)
+	}
 }
 
 export async function saveData(
@@ -107,6 +167,10 @@ export async function saveData(
 		body: JSON.stringify(data),
 	})
 	if (!response.ok) throw await responseError(response)
+	userDataCache.set(userDataCacheKey(host, 'api/data', token), {
+		data,
+		lastModified: response.headers.get('last-modified') ?? undefined,
+	})
 }
 
 export async function deleteData(
@@ -119,6 +183,7 @@ export async function deleteData(
 		method: 'DELETE',
 	})
 	if (!response.ok) throw await responseError(response)
+	userDataCache.delete(userDataCacheKey(host, 'api/data', token))
 }
 
 export function songId(song: Song) {
