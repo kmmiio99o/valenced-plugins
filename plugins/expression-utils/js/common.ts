@@ -1,6 +1,7 @@
 import { lookupModuleWithImportedPath } from '@valenced/discord/utils/modules/finders'
 import { getModules, lookupModule } from '@valenced/modules/finders'
 import { withDependencies, withProps } from '@valenced/modules/finders/filters'
+import { getModuleDependencies } from '@valenced/modules/metro'
 import type { Guild, StickerNode } from './types'
 
 interface StickerActions {
@@ -54,6 +55,19 @@ export const modules: {
 	}
 	stickerDetailSheet?: StickerDetailSheet
 } = {}
+
+export function initializeStickerDetailSheet(moduleId: number) {
+	for (const dependencyId of getModuleDependencies(moduleId) ?? []) {
+		const exports = __r(dependencyId)
+		if (
+			typeof exports?.showStickerDetailActionSheet === 'function' &&
+			typeof exports.hideStickerDetailActionSheet === 'function'
+		) {
+			modules.stickerDetailSheet = exports as StickerDetailSheet
+			return
+		}
+	}
+}
 
 export function initializeEmojiSlotUtils() {
 	if (modules.emojiSlotUtils) return
@@ -109,15 +123,6 @@ export function findExpressionModules() {
 			),
 			value => {
 				modules.stickerStore = value
-			},
-		),
-		getModules(
-			withProps<StickerDetailSheet>(
-				'showStickerDetailActionSheet',
-				'hideStickerDetailActionSheet',
-			),
-			value => {
-				modules.stickerDetailSheet = value
 			},
 		),
 	]
