@@ -1,5 +1,6 @@
 import { getModuleWithImportedPath } from '@valenced/discord/utils/modules/finders'
-import { modules } from '../common'
+import { onModuleFinishedImporting } from '@valenced/discord/utils/modules/metro/subscriptions'
+import { initializeStickerDetailSheet, modules } from '../common'
 import { appendAction, findReactNode, patchFunction } from './reactTree'
 import type { FC } from 'react'
 import type { StickerNode } from '../types'
@@ -29,6 +30,13 @@ export function installStickerPatches(
 	addCleanup: AddCleanup,
 	reportError: ReportError,
 ) {
+	addCleanup(
+		onModuleFinishedImporting((id, path) => {
+			if (path !== 'modules/stickers/native/StickerPicker.tsx') return
+			initializeStickerDetailSheet(id)
+		}),
+	)
+
 	addCleanup(
 		getModuleWithImportedPath<{
 			default: FC<StickerDetailProps> | { type?: FC<StickerDetailProps> }
@@ -80,7 +88,7 @@ export function installStickerPatches(
 							grid.props.onLongPressStickerDetail = (
 								renderableSticker: unknown,
 							) => {
-								modules.stickerDetailSheet?.showStickerDetailActionSheet({
+								modules.stickerDetailSheet!.showStickerDetailActionSheet({
 									renderableSticker,
 									channel,
 								})
