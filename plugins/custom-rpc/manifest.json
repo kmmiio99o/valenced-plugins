@@ -1,0 +1,16 @@
+{
+	"format": 1,
+	"id": "dev.kmmiio99o.custom.rpc",
+	"name": "Custom RPC",
+	"description": "Set a fully custom Rich Presence activity on your profile.",
+	"author": "kmmiio99o",
+	"icon": "GameControllerIcon",
+	"version": "1.0.0",
+	"dependencies": {
+		"valenced.api": { "version": ">=1 <2" },
+		"discord": { "version": "*" }
+	},
+	"dist": {
+		"script": "index.js"
+	}
+}
