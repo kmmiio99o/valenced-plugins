@@ -31,13 +31,37 @@
         }
       }
     },
+    "dev.kmmiio99o.custom.rpc": {
+      "name": "Custom RPC",
+      "description": "Set a fully custom Rich Presence activity on your profile.",
+      "author": "kmmiio99o",
+      "icon": "GameControllerIcon",
+      "channels": {
+        "latest": "1.0.0"
+      },
+      "versions": {
+        "1.0.0": {
+          "url": "https://kmmiio99o.github.io/valenced-plugins/pool/dev.kmmiio99o.custom.rpc@1.0.0.zip",
+          "sha256": "626f97ed80b2950d31ae648b2d7773fa194195161933539d7f735557a8fd04cc",
+          "size": 12605,
+          "dependencies": {
+            "valenced.api": {
+              "version": ">=1 <2"
+            },
+            "discord": {
+              "version": "*"
+            }
+          }
+        }
+      }
+    },
     "dev.kmmiio99o.expression-utils": {
       "name": "Expression Utils",
       "description": "Adds useful actions to custom emoji and sticker sheets, including cloning expressions to servers you manage.",
       "author": "kmmiio99o <879393496627306587> (https://github.com/sponsors/kmmiio99o \"Donations\") (https://kmmiio99o.dev \"Website\") (https://github.com/kmmiio99o \"GitHub\")",
       "icon": "EmojiSmilingFacewithHeartsIcon",
       "channels": {
-        "latest": "1.0.2"
+        "latest": "1.0.3"
       },
       "versions": {
         "1.0.0": {
@@ -70,6 +94,19 @@
           "url": "https://kmmiio99o.github.io/valenced-plugins/pool/dev.kmmiio99o.expression-utils@1.0.2.zip",
           "sha256": "c9bd44a619ebf0f6ba215b6ce2600e87568a2b8b945c8e822ff10610a67c6a17",
           "size": 26132,
+          "dependencies": {
+            "valenced.api": {
+              "version": ">=1 <2"
+            },
+            "discord": {
+              "version": "*"
+            }
+          }
+        },
+        "1.0.3": {
+          "url": "https://kmmiio99o.github.io/valenced-plugins/pool/dev.kmmiio99o.expression-utils@1.0.3.zip",
+          "sha256": "148394e3d9d1a30c76b106d3f80f09afdcc3fb44891555da169374cf70341a07",
+          "size": 26219,
           "dependencies": {
             "valenced.api": {
               "version": ">=1 <2"
