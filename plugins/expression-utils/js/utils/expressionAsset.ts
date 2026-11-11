@@ -20,7 +20,7 @@ export function getExpressionAsset(sticker: StickerNode) {
 	if (!url || !extension) throw new Error('Unsupported sticker asset.')
 
 	return {
-		url: extension === 'png' ? url.replace(/\.webp\?/i, '.png?') : url,
+		url: url.replace(/\.webp(?=\?|$)/i, extension === 'gif' ? '.gif' : '.png'),
 		extension,
 		mimeType: mimeByExtension[extension]!,
 	}

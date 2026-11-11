@@ -13,3 +13,5 @@ node_modules/
 .DS_Store
 .idea/
 *.iml
+discord-apk/
+discord-mobile-datamining/
