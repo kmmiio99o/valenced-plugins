@@ -1,4 +1,3 @@
-import { Design } from '@valenced/discord/design'
 import { StyleSheet, View } from 'react-native'
 import { Roles } from './colors'
 import { SliderMetrics, SliderStyles } from './sliderStyles'
@@ -28,16 +27,9 @@ export function M3Slider(props: SliderProps) {
 					props.minimumTrackTintColor !== 'transparent'
 				? props.minimumTrackTintColor
 				: primary
-	const label =
-		props.formatValue?.(current) ?? Number(current.toFixed(2)).toString()
-	const labelWidth = Math.max(
-		SliderMetrics.valueIndicator.width,
-		label.length * 9 + 16,
-	)
-	const labelLeft = Math.min(
-		Math.max(x - labelWidth / 2, 0),
-		Math.max(width - labelWidth, 0),
-	)
+	const handleWidth = dragging
+		? 3
+		: SliderMetrics.handle.width
 
 	return (
 		<View style={[SliderStyles.row, props.style]}>
@@ -90,32 +82,13 @@ export function M3Slider(props: SliderProps) {
 							style={[
 								SliderStyles.handle,
 								{
-									left: x - SliderMetrics.handle.width / 2,
+									left: x - handleWidth / 2,
+									width: handleWidth,
+									borderRadius: handleWidth / 2,
 									backgroundColor: thumb,
 								},
 							]}
 						/>
-						{dragging ? (
-							<View
-								pointerEvents="none"
-								style={[
-									SliderStyles.valueIndicator,
-									{
-										left: labelLeft,
-										width: labelWidth,
-										top:
-											(SliderMetrics.handle.height - SliderMetrics.track) / 2 -
-											SliderMetrics.valueIndicator.bottomSpace -
-											SliderMetrics.valueIndicator.height,
-										backgroundColor: Roles.surfaceHighest(),
-									},
-								]}
-							>
-								<Design.Text variant="text-sm/medium" numberOfLines={1}>
-									{label}
-								</Design.Text>
-							</View>
-						) : null}
 					</View>
 				) : null}
 			</View>

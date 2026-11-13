@@ -4,10 +4,9 @@ export const SliderMetrics = {
 	track: 16,
 	gap: 6,
 	handle: { width: 4, height: 44 },
-	valueIndicator: { width: 48, height: 32, bottomSpace: 12 },
 }
 
-const { track, handle, valueIndicator } = SliderMetrics
+const { track, handle } = SliderMetrics
 
 export const SliderStyles = StyleSheet.create({
 	row: { flexDirection: 'row', alignItems: 'center', gap: 8 },
@@ -33,15 +32,5 @@ export const SliderStyles = StyleSheet.create({
 		width: handle.width,
 		height: handle.height,
 		borderRadius: handle.width / 2,
-	},
-	valueIndicator: {
-		position: 'absolute',
-		minWidth: valueIndicator.width,
-		height: valueIndicator.height,
-		paddingHorizontal: 8,
-		borderRadius: valueIndicator.height / 2,
-		alignItems: 'center',
-		justifyContent: 'center',
-		elevation: 3,
 	},
 })
