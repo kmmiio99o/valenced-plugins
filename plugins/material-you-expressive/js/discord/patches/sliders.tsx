@@ -1,10 +1,26 @@
 import { getModules } from '@valenced/modules/finders'
-import { withName, withProps } from '@valenced/modules/finders/filters'
+import {
+	createFilterGenerator,
+	withProps,
+} from '@valenced/modules/finders/filters'
 import { forwardRef } from 'react'
 import { M3Slider } from '../../components/slider'
 import { replaceExport } from './exports'
-import type { ComponentType } from 'react'
 import type { Exports, Restore } from './exports'
+
+const withNativeSliderComponent = createFilterGenerator<[]>(
+	(_args, _id, exports) => {
+		if (!exports || typeof exports !== 'object') return false
+		const slider = (
+			exports as { default?: { $$typeof?: symbol; render?: { name?: string } } }
+		).default
+		return (
+			slider?.$$typeof === Symbol.for('react.forward_ref') &&
+			slider.render?.name === 'SliderComponent'
+		)
+	},
+	() => 'native-slider-component',
+)()
 
 export function patchSliders(restores: Restore[]) {
 	const cleanups = [
@@ -14,16 +30,10 @@ export function patchSliders(restores: Restore[]) {
 			{ max: 4 },
 		),
 		getModules(
-			withName('SliderComponent'),
-			exports => {
-				const module = exports as Exports
-				const slider = module.default as ComponentType<any> & {
-					render?: { name?: string }
-				}
-				if (slider?.render?.name !== 'SliderComponent') return
-
+			withNativeSliderComponent,
+			module =>
 				replaceExport(
-					module,
+					module as Exports,
 					'default',
 					Original =>
 						forwardRef((props: any, ref) =>
@@ -37,8 +47,7 @@ export function patchSliders(restores: Restore[]) {
 							),
 						),
 					restores,
-				)
-			},
+				),
 			{ max: 1, returnNamespace: true },
 		),
 	]
