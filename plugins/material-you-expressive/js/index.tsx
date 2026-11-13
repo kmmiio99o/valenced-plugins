@@ -1,3 +1,4 @@
+import { setGuildShapesEnabled } from './components/screens'
 import { patchComponents } from './discord/patches/components'
 import { patchRadii } from './discord/patches/radii'
 import { setAvatarShapes } from './native/avatarShapes'
@@ -16,17 +17,25 @@ export default plugin<{ jsonStorage: Settings }>({
 		cleanup(patchComponents(settings))
 	},
 	start({ cleanup, jsonStorage, plugin: self }) {
-		let avatarShapes = readSettings(jsonStorage.cache).avatarShapes
+		const initialSettings = readSettings(jsonStorage.cache)
+		let avatarShapes = initialSettings.avatarShapes
+		let guildShapes = initialSettings.expressiveGuilds
+		setGuildShapesEnabled(guildShapes)
 		const applyAvatarSetting = (enabled: boolean) => {
 			void setAvatarShapes(enabled).catch(error => self.reportError(error))
 		}
 		applyAvatarSetting(avatarShapes)
 		cleanup(
 			jsonStorage.subscribe(() => {
-				const next = readSettings(jsonStorage.cache).avatarShapes
-				if (next === avatarShapes) return
-				avatarShapes = next
-				applyAvatarSetting(next)
+				const settings = readSettings(jsonStorage.cache)
+				if (settings.avatarShapes !== avatarShapes) {
+					avatarShapes = settings.avatarShapes
+					applyAvatarSetting(avatarShapes)
+				}
+				if (settings.expressiveGuilds !== guildShapes) {
+					guildShapes = settings.expressiveGuilds
+					setGuildShapesEnabled(guildShapes)
+				}
 			}),
 		)
 	},

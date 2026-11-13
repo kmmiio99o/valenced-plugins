@@ -5,6 +5,7 @@ import { M3Radio, M3Switch } from '../../components'
 import { M3Fab } from '../../components/fab'
 import { segmented } from '../../components/groups'
 import { AccentTitle, tonalIcon } from '../../components/rows'
+import { patchChatInput } from './chatInput'
 import { replaceExport } from './exports'
 import { patchNamedComponents } from './named'
 import { patchSliders } from './sliders'
@@ -94,6 +95,7 @@ export function patchComponents(settings: Settings) {
 		)
 	}
 	if (settings.expressiveSliders) cleanups.push(patchSliders(restores))
+	if (settings.expressiveChatInput) cleanups.push(patchChatInput())
 	if (settings.expressiveFloatingActionButtons)
 		cleanups.push(
 			getModules(
