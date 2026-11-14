@@ -1,3 +1,4 @@
+import { Design } from '@valenced/discord/design'
 import {
 	cloneElement,
 	isValidElement,
@@ -11,7 +12,6 @@ import {
 	Image,
 	Pressable,
 	StyleSheet,
-	Text,
 	View,
 } from 'react-native'
 import { Roles } from './colors'
@@ -138,9 +138,12 @@ export function M3Fab({
 					]}
 				>
 					{renderActionIcon(onSurfaceVariant)}
-					<Text style={[styles.label, { color: onSurfaceVariant }]}>
+					<Design.Text
+						variant="text-md/semibold"
+						style={[styles.label, { color: onSurfaceVariant }]}
+					>
 						{accessibilityLabel}
-					</Text>
+					</Design.Text>
 				</Pressable>
 			</AnimatedView>
 			<Pressable
@@ -214,7 +217,6 @@ const styles = StyleSheet.create({
 	},
 	label: {
 		flexShrink: 1,
-		fontSize: 14,
 	},
 	trigger: {
 		position: 'absolute',
