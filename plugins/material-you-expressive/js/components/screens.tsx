@@ -1,5 +1,12 @@
 import { Design } from '@valenced/discord/design'
-import { useSyncExternalStore } from 'react'
+import {
+	createContext,
+	createElement,
+	forwardRef,
+	isValidElement,
+	useContext,
+	useSyncExternalStore,
+} from 'react'
 import { StyleSheet, View } from 'react-native'
 import { color } from './colors'
 import type { ComponentType, ReactNode } from 'react'
@@ -8,6 +15,9 @@ type Props = Record<string, any>
 type Component = ComponentType<Props>
 
 const Pill = 999
+const HeaderActionsContext = createContext(false)
+const YouBarContext = createContext(false)
+const ChatSendButtonSizeContext = createContext<number | undefined>(undefined)
 let guildShapesEnabled = false
 const guildShapeListeners = new Set<() => void>()
 
@@ -19,26 +29,110 @@ function subscribeToGuildShapes(listener: () => void) {
 const Surface = () =>
 	color(['BACKGROUND_SURFACE_HIGH', 'BACKGROUND_MOD_SUBTLE'], '#242b2a')
 
+function componentName(value: unknown): string | undefined {
+	if (Array.isArray(value)) {
+		for (const child of value) {
+			const name = componentName(child)
+			if (name) return name
+		}
+		return
+	}
+	const type = isValidElement(value) ? value.type : value
+	if (typeof type !== 'function') return
+	const component = type as ComponentType & { displayName?: string }
+	return component.displayName ?? component.name
+}
+
 export function setGuildShapesEnabled(enabled: boolean) {
 	if (guildShapesEnabled === enabled) return
 	guildShapesEnabled = enabled
 	for (const listener of guildShapeListeners) listener()
 }
 
-/** Pill corners unless a caller asks for others. */
-export const pillButton = (Button: Component) =>
-	function PillButton(props: Props) {
-		return <Button {...props} cornerRadius={props.cornerRadius ?? Pill} />
+/** Marks Discord channel-header actions so their native controls can be styled individually. */
+export const expressiveHeaderActions = (Actions: Component) =>
+	function ExpressiveHeaderActions(props: Props) {
+		return (
+			<HeaderActionsContext.Provider value>
+				<Actions {...props} />
+			</HeaderActionsContext.Provider>
+		)
 	}
 
-/** Header actions (call, video, search) grouped in one tonal pill. */
-export const tonalActions = (Actions: Component) =>
-	function TonalActions(props: Props) {
+/** Keep Discord's YouBar intact and scope its custom shape to native descendants. */
+export const expressiveYouBar = (YouBar: Component) =>
+	function ExpressiveYouBar(props: Props) {
 		return (
-			<View style={[styles.actions, { backgroundColor: Surface() }]}>
-				<Actions {...props} />
-			</View>
+			<YouBarContext.Provider value>
+				<YouBar {...props} />
+			</YouBarContext.Provider>
 		)
+	}
+
+export const expressiveChatSendControl = (size: number, children: ReactNode) =>
+	createElement(ChatSendButtonSizeContext.Provider, { value: size, children })
+
+export const expressiveYouBarBackground = (Background: Component) =>
+	function ExpressiveYouBarBackground(props: Props) {
+		return createElement(
+			View,
+			{
+				pointerEvents: 'none',
+				style: [StyleSheet.absoluteFill, styles.youBarBackground],
+			},
+			createElement(Background, props),
+		)
+	}
+
+export const expressiveYouBarSurface = (Surface: Component) =>
+	forwardRef<unknown, Props>(function ExpressiveYouBarSurface(props, ref) {
+		const inYouBar = useContext(YouBarContext)
+		// Avoid re-entering the beforeJSX(View) hook with its replacement element.
+		return createElement(Surface, {
+			...props,
+			ref,
+			style: [props.style, inYouBar ? styles.youBarSurface : null],
+		})
+	})
+
+/** Keep channel-header icon buttons compact and surface the channel search action. */
+export const expressiveHeaderAction = (Button: Component) =>
+	function ExpressiveHeaderAction(props: Props) {
+		const inHeaderActions = useContext(HeaderActionsContext)
+		const sendButtonSize = useContext(ChatSendButtonSizeContext)
+		if (sendButtonSize !== undefined) {
+			const radius = sendButtonSize / 2
+			return createElement(Button, {
+				...props,
+				style: [
+					props.style,
+					{
+						width: sendButtonSize,
+						height: sendButtonSize,
+						borderRadius: radius,
+						backgroundColor: 'transparent',
+					},
+				],
+			})
+		}
+		if (!inHeaderActions) return createElement(Button, props)
+
+		if (props.icon != null)
+			return createElement(Button, { ...props, size: 'sm' })
+
+		const iconName = componentName(props.IconComponent ?? props.children)
+		if (iconName === 'MagnifyingGlassIcon')
+			return createElement(Button, {
+				...props,
+				hitSlop: props.hitSlop ?? 8,
+				style: [
+					props.style,
+					styles.searchAction,
+					{ backgroundColor: Surface() },
+				],
+			})
+
+		return createElement(Button, props)
 	}
 
 export const largeTitle = () =>
@@ -94,12 +188,22 @@ export const shapedGuild = (Item: Component) =>
 	}
 
 const styles = StyleSheet.create({
-	actions: {
-		flexDirection: 'row',
+	searchAction: {
+		minWidth: 32,
+		minHeight: 32,
+		padding: 4,
+		borderRadius: Pill,
 		alignItems: 'center',
-		borderRadius: 24,
-		paddingHorizontal: 4,
+		justifyContent: 'center',
 	},
+	youBarSurface: {
+		borderRadius: Pill,
+		borderTopLeftRadius: Pill,
+		borderTopRightRadius: Pill,
+		borderBottomLeftRadius: Pill,
+		borderBottomRightRadius: Pill,
+	},
+	youBarBackground: { borderRadius: Pill, overflow: 'hidden' },
 	card: {
 		marginHorizontal: 8,
 		paddingVertical: RowGap,

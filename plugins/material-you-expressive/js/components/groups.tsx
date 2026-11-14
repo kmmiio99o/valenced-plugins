@@ -1,9 +1,15 @@
 import { Design } from '@valenced/discord/design'
-import { Children, cloneElement, createElement, isValidElement } from 'react'
+import {
+	Children,
+	createContext,
+	createElement,
+	isValidElement,
+	useContext,
+} from 'react'
 import { StyleSheet, View } from 'react-native'
 import { AccentTitle } from './rows'
-import type { ComponentType, ReactElement, ReactNode } from 'react'
-import type { ViewStyle } from 'react-native'
+import type { ComponentType, ReactNode } from 'react'
+import type { ViewProps, ViewStyle } from 'react-native'
 
 interface GroupProps {
 	title?: string
@@ -16,8 +22,6 @@ interface GroupProps {
 const Gap = 2
 const Outer = 24
 const Inner = 4
-// how deep to look for the group's card in what it renders
-const MaxDepth = 6
 
 type Corners = Pick<
 	ViewStyle,
@@ -27,30 +31,7 @@ type Corners = Pick<
 	| 'borderBottomRightRadius'
 >
 
-/** Gives the first rounded view in a rendered tree (the group's card) new corners. */
-function reshape(node: ReactNode, corners: Corners, depth = 0): ReactNode {
-	if (!isValidElement(node) || depth > MaxDepth) return node
-
-	const element = node as ReactElement<{
-		style?: unknown
-		children?: ReactNode
-	}>
-	const style = StyleSheet.flatten(element.props.style as ViewStyle) as
-		| ViewStyle
-		| undefined
-
-	if (typeof style?.borderRadius === 'number' && style.borderRadius > 0)
-		return cloneElement(element, { style: [element.props.style, corners] })
-
-	const { children } = element.props
-	if (children == null || typeof children !== 'object') return element
-
-	return cloneElement(element, {
-		children: Children.map(children, child =>
-			reshape(child, corners, depth + 1),
-		),
-	})
-}
+const SegmentCornersContext = createContext<Corners | null>(null)
 
 function cornersOf(index: number, count: number): Corners {
 	const top = index === 0 ? Outer : Inner
@@ -63,24 +44,24 @@ function cornersOf(index: number, count: number): Corners {
 	}
 }
 
+export function SegmentedGroupSurface(props: ViewProps) {
+	const corners = useContext(SegmentCornersContext)
+	return createElement(View, {
+		...props,
+		style: corners ? [props.style, corners] : props.style,
+	})
+}
+
 /**
- * Splits a row group into segments: each row renders in a group of its own, so Discord still
- * styles it, then the group's card gets M3's large outer and small inner corners.
+ * Splits a row group into native groups while preserving component hook boundaries.
  */
-export function segmented(Group: ComponentType<GroupProps>) {
-	// plain function components can be rendered inline, which lets the card be reshaped
-	const inline =
-		typeof Group === 'function' &&
-		!(Group.prototype as { isReactComponent?: unknown } | undefined)
-			?.isReactComponent
-
-	const renderSegment = (props: GroupProps, corners: Corners) =>
-		inline
-			? reshape((Group as (props: GroupProps) => ReactNode)(props), corners)
-			: createElement(Group, props)
-
+export function segmented(Group: ComponentType<any>) {
 	function Segment({ corners, ...props }: GroupProps & { corners: Corners }) {
-		return <>{renderSegment(props, corners)}</>
+		return (
+			<SegmentCornersContext.Provider value={corners}>
+				<Group {...props} />
+			</SegmentCornersContext.Provider>
+		)
 	}
 
 	return function SegmentedGroup(props: GroupProps) {

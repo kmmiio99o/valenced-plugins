@@ -1,14 +1,52 @@
 import Page from '@valenced/components/Page'
+import { Tokens } from '@valenced/discord/common/tokens'
 import { Design } from '@valenced/discord/design'
-import { ScrollView } from 'react-native'
+import { Children, isValidElement } from 'react'
+import { ScrollView, StyleSheet, View } from 'react-native'
+import { AccentTitle } from '../components/rows'
 import { readSettings } from './types'
 import type { PluginSettingsComponent } from '@valenced/plugins/types'
-import type { ComponentProps } from 'react'
+import type { ComponentProps, Context, ReactNode } from 'react'
 import type { Settings } from './types'
 
-const { TableRowGroup, TableSwitchRow } = Design
 type Props = ComponentProps<PluginSettingsComponent<{ jsonStorage: Settings }>>
 type FeatureKey = Exclude<keyof Settings, 'avatarShapes'>
+
+function SettingsGroup({
+	title,
+	children,
+}: {
+	title: string
+	children: ReactNode
+}) {
+	const { TableRowGroupContext } = Design as unknown as {
+		TableRowGroupContext: Context<boolean>
+	}
+	const rows = Children.toArray(children).filter(isValidElement)
+	return (
+		<View style={{ marginBottom: Tokens.default.space.PX_16 }}>
+			<AccentTitle title={title} />
+			<View style={styles.rows}>
+				{rows.map((row, index) => (
+					<View
+						key={row.key ?? index}
+						style={[
+							styles.rowSurface,
+							{
+								borderRadius: Tokens.default.radii.lg,
+								backgroundColor: Tokens.default.colors.CARD_MUTED_BG,
+							},
+						]}
+					>
+						<TableRowGroupContext.Provider value>
+							{row}
+						</TableRowGroupContext.Provider>
+					</View>
+				))}
+			</View>
+		</View>
+	)
+}
 
 const Features: { key: FeatureKey; label: string }[] = [
 	{ key: 'expressiveCorners', label: 'Expressive corners' },
@@ -28,6 +66,7 @@ const Features: { key: FeatureKey; label: string }[] = [
 ]
 
 export default function SettingsPage({ api }: Props) {
+	const { TableSwitchRow } = Design
 	const settings = readSettings(api.jsonStorage.use())
 
 	const updateAvatarShapes = async (enabled: boolean) => {
@@ -56,7 +95,7 @@ export default function SettingsPage({ api }: Props) {
 			contentContainerStyle={{ paddingBottom: 24 }}
 		>
 			<Page>
-				<TableRowGroup title="Appearance">
+				<SettingsGroup title="Appearance">
 					<TableSwitchRow
 						label="Shape message avatars"
 						subLabel="Clip chat avatars to the Material 3 cookie shape."
@@ -72,8 +111,8 @@ export default function SettingsPage({ api }: Props) {
 							onValueChange={value => updateFeature(key, value)}
 						/>
 					))}
-				</TableRowGroup>
-				<TableRowGroup title="Components">
+				</SettingsGroup>
+				<SettingsGroup title="Components">
 					{Features.slice(1).map(({ key, label }) => (
 						<TableSwitchRow
 							key={key}
@@ -87,8 +126,13 @@ export default function SettingsPage({ api }: Props) {
 							onValueChange={value => updateFeature(key, value)}
 						/>
 					))}
-				</TableRowGroup>
+				</SettingsGroup>
 			</Page>
 		</ScrollView>
 	)
 }
+
+const styles = StyleSheet.create({
+	rows: { gap: 2 },
+	rowSurface: { overflow: 'hidden' },
+})

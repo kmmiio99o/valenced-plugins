@@ -1,3 +1,4 @@
+import { Tokens } from '@valenced/discord/common/tokens'
 import { beforeJSX } from '@valenced/react/jsx-runtime'
 import {
 	cloneElement,
@@ -11,6 +12,7 @@ import {
 } from 'react'
 import { StyleSheet, View } from 'react-native'
 import { color, Roles } from '../../components/colors'
+import { expressiveChatSendControl } from '../../components/screens'
 import type { ReactElement, ReactNode, Ref } from 'react'
 import type { StyleProp, ViewStyle } from 'react-native'
 
@@ -33,18 +35,19 @@ interface SendButtonHandle {
 
 interface SendControlProps {
 	button: ReactElement<SendButtonProps>
+	size: number
+	measured: boolean
 }
-
-const voiceControlSize = 56
-const voiceControlGap = 8
-const voiceControlSpace = voiceControlSize + voiceControlGap
 
 const styles = StyleSheet.create({
 	composer: {
-		position: 'relative',
-		borderRadius: 28,
 		borderWidth: 0,
 		overflow: 'visible',
+	},
+	composerRow: {
+		flexDirection: 'row',
+		alignItems: 'flex-end',
+		gap: 8,
 	},
 	outer: {
 		backgroundColor: 'transparent',
@@ -54,24 +57,27 @@ const styles = StyleSheet.create({
 		overflow: 'visible',
 	},
 	sendControl: {
-		position: 'absolute',
-		right: -voiceControlSpace,
-		bottom: 0,
-		width: voiceControlSize,
-		height: voiceControlSize,
-		borderRadius: voiceControlSize / 2,
+		position: 'relative',
 		alignItems: 'center',
 		justifyContent: 'center',
-		zIndex: 1,
 	},
 })
+
+interface ComposerRowProps {
+	node: ReactElement<ComposerProps>
+	sendButton: ReactElement<SendButtonProps>
+	sendIndex: number
+	backgroundColor: ViewStyle['backgroundColor']
+	horizontalPadding: number
+	verticalPadding: number
+}
 
 function hasText(value: string | undefined) {
 	return typeof value === 'string' && value.trim().length > 0
 }
 
 const SendControl = forwardRef<SendButtonHandle, SendControlProps>(
-	({ button }, ref) => {
+	({ button, size, measured }, ref) => {
 		const [sendMode, setSendMode] = useState(() =>
 			hasText(button.props.defaultValue),
 		)
@@ -100,16 +106,109 @@ const SendControl = forwardRef<SendButtonHandle, SendControlProps>(
 			? color(['CHAT_INPUT_SEND_BUTTON_ACTIVE_BACKGROUND'], Roles.primary())
 			: Roles.secondaryContainer()
 
-		return createElement(
-			View,
-			{
-				pointerEvents: 'box-none',
-				style: [styles.sendControl, { backgroundColor }],
-			},
-			cloneElement(button, { ref: innerRef }),
+		return expressiveChatSendControl(
+			size,
+			createElement(
+				View,
+				{
+					pointerEvents: 'box-none',
+					style: [
+						styles.sendControl,
+						{
+							width: size,
+							height: size,
+							borderRadius: size / 2,
+							backgroundColor,
+						},
+					],
+				},
+				createElement(
+					View,
+					{
+						pointerEvents: measured ? 'auto' : 'none',
+						accessibilityElementsHidden: !measured,
+						importantForAccessibility: measured
+							? 'auto'
+							: 'no-hide-descendants',
+						style: { opacity: measured ? 1 : 0 },
+					},
+					cloneElement(button, { ref: innerRef }),
+				),
+			),
 		)
 	},
 )
+
+function ComposerRow({
+	node,
+	sendButton,
+	sendIndex,
+	backgroundColor,
+	horizontalPadding,
+	verticalPadding,
+}: ComposerRowProps) {
+	const [controlSize, setControlSize] = useState<number>(
+		Tokens.default.modules.mobile.CHAT_INPUT_SEND_BUTTON_HEIGHT +
+			verticalPadding * 2,
+	)
+	const [hasMeasuredComposer, setHasMeasuredComposer] = useState(false)
+	const children = (node.props.children as ReactNode[]).filter(
+		(_, index) => index !== sendIndex,
+	)
+	const contents = cloneElement(node, {
+		style: [
+			node.props.style,
+			{
+				paddingHorizontal: 0,
+				paddingVertical: 0,
+				backgroundColor: 'transparent',
+			},
+		],
+		children,
+	})
+	const composer = createElement(
+		View,
+		{
+			onLayout: ({ nativeEvent }) => {
+				const { height } = nativeEvent.layout
+				if (height > 0) {
+					setControlSize(current => (current === height ? current : height))
+					setHasMeasuredComposer(true)
+				}
+			},
+			style: [
+				styles.composer,
+				{
+					flex: 1,
+					minWidth: 0,
+					paddingHorizontal: horizontalPadding,
+					paddingVertical: verticalPadding,
+					borderRadius: controlSize / 2,
+					backgroundColor,
+				},
+			],
+		},
+		contents,
+	)
+	const control = createElement(SendControl, {
+		key: sendButton.key ?? 'expressive-chat-send-control',
+		ref: sendButton.props.ref,
+		button: sendButton,
+		size: controlSize,
+		measured: hasMeasuredComposer,
+	})
+
+	return createElement(
+		View,
+		{
+			key: node.key ?? undefined,
+			pointerEvents: 'box-none',
+			style: styles.composerRow,
+		},
+		composer,
+		control,
+	)
+}
 
 function isNodeArray(node: ReactNode): node is ReactNode[] {
 	return Array.isArray(node)
@@ -141,24 +240,22 @@ function restyleMainContents(
 
 	const sendButton = node.props.children[sendIndex]
 	if (!isSendButton(sendButton)) return node
-	const originalRef = sendButton.props.ref
-	const children = [...node.props.children]
-	children[sendIndex] = createElement(SendControl, {
-		key: sendButton.key ?? 'expressive-chat-send-control',
-		ref: originalRef,
-		button: sendButton,
-	})
-
-	return cloneElement(node, {
-		style: [
-			node.props.style,
-			styles.composer,
-			{
-				backgroundColor,
-				marginRight: voiceControlSpace,
-			},
-		],
-		children,
+	const verticalPadding =
+		typeof nativeStyle.paddingVertical === 'number'
+			? nativeStyle.paddingVertical
+			: 0
+	const horizontalPadding =
+		typeof nativeStyle.paddingHorizontal === 'number'
+			? nativeStyle.paddingHorizontal
+			: 0
+	return createElement(ComposerRow, {
+		key: node.key ?? undefined,
+		node,
+		sendButton,
+		sendIndex,
+		backgroundColor,
+		horizontalPadding,
+		verticalPadding,
 	})
 }
 

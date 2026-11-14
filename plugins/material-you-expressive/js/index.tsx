@@ -8,7 +8,7 @@ import type { Settings } from './settings/types'
 
 export default plugin<{ jsonStorage: Settings }>({
 	jsonStorage: { load: true, default: readSettings({}) },
-	async preInit({ cleanup, unscoped, plugin: self }) {
+	async init({ cleanup, unscoped, plugin: self }) {
 		if (self.startedLate) self.requireReload()
 
 		const storage = unscoped.jsonStorage.getJsonStorage<Settings>(
@@ -16,7 +16,7 @@ export default plugin<{ jsonStorage: Settings }>({
 			{ default: readSettings({}) },
 		)
 		const settings = readSettings(await storage.get())
-		if (settings.expressiveCorners) patchRadii(cleanup)
+		patchRadii(cleanup, settings)
 		cleanup(patchComponents(settings, error => self.reportError(error)))
 	},
 	async start({ cleanup, jsonStorage, plugin: self }) {

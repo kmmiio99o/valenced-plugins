@@ -7,14 +7,14 @@ import {
 import { beforeJSX } from '@valenced/react/jsx-runtime'
 import { StyleSheet, View } from 'react-native'
 import { Roles, withAlpha } from '../../components/colors'
-import { segmented } from '../../components/groups'
+import { SegmentedGroupSurface, segmented } from '../../components/groups'
 import {
 	cardRow,
+	expressiveHeaderAction,
+	expressiveHeaderActions,
 	largeTitle,
-	pillButton,
 	setGuildShapesEnabled,
 	shapedGuild,
-	tonalActions,
 } from '../../components/screens'
 import { replaceExport, replaceProperty } from './exports'
 import type { ComponentType } from 'react'
@@ -71,16 +71,58 @@ export function patchComponentByName(
 }
 
 const NamedComponents = [
-	['expressiveButtons', 'BaseButton', pillButton],
-	['expressiveButtons', 'BaseTextButton', pillButton],
-	['expressiveButtons', 'PrivateChannelButtons', tonalActions],
-	['expressiveButtons', 'ChannelActions', tonalActions],
+	['expressiveButtons', 'ChannelActions', expressiveHeaderActions],
+	[
+		'expressiveButtons',
+		'NavigationHeaderWithSearchWrapped',
+		expressiveHeaderActions,
+	],
+	['expressiveButtons', 'IconButton', expressiveHeaderAction],
+	['expressiveButtons', 'IconActionButton', expressiveHeaderAction],
+	['expressiveTabs', 'SegmentedControlItem', expressiveSegment],
 	['expressiveHeaders', 'GenericHeaderTitle', largeTitle],
 	['expressiveMessageRows', 'MessagesItemChannelBase', cardRow],
 ] as const
 
 const GuildsBarComponent = 'GuildsBarAnimatedItemWrapper'
 const ExpressiveHeaderTitle = largeTitle()
+
+function expressiveSegment(Item: ComponentType<any>) {
+	return function ExpressiveSegment(props: Record<string, any>) {
+		const { index, itemCount } = props
+		if (
+			typeof index !== 'number' ||
+			typeof itemCount !== 'number' ||
+			itemCount < 1
+		)
+			return <Item {...props} />
+
+		const first = index === 0
+		const last = index === itemCount - 1
+		const outerRadius = Tokens.default.radii.lg
+		const innerRadius = Tokens.default.radii.sm
+
+		return (
+			<Item
+				{...props}
+				style={[
+					props.style,
+					{
+						borderColor: withAlpha(Roles.outline(), 0.32),
+						borderTopWidth: 1,
+						borderBottomWidth: 1,
+						borderStartWidth: 1,
+						borderEndWidth: last ? 1 : 0,
+						borderTopStartRadius: first ? outerRadius : innerRadius,
+						borderBottomStartRadius: first ? outerRadius : innerRadius,
+						borderTopEndRadius: last ? outerRadius : innerRadius,
+						borderBottomEndRadius: last ? outerRadius : innerRadius,
+					},
+				]}
+			/>
+		)
+	}
+}
 
 function patchTabStyles(restores: Restore[]) {
 	const segmentedControlBackground =
@@ -140,7 +182,6 @@ function patchTabStyles(restores: Restore[]) {
 							props.style,
 							{
 								backgroundColor: Roles.surfaceHighest(),
-								borderRadius: 24,
 							},
 						],
 					},
@@ -159,8 +200,7 @@ function patchTabStyles(restores: Restore[]) {
 						style: [
 							props.style,
 							{
-								backgroundColor: withAlpha(Roles.primary(), 0.16),
-								borderRadius: 20,
+								backgroundColor: Roles.secondaryContainer(),
 							},
 						],
 					},
@@ -221,6 +261,31 @@ function patchActionSheetRowGroup(
 	)
 }
 
+function patchSegmentedGroupSurface(restores: Restore[]) {
+	restores.push(
+		beforeJSX(View, args => {
+			const [, props, key] = args
+			const style = StyleSheet.flatten(props.style)
+			const tableRowGroupSurface =
+				style?.overflow === 'hidden' &&
+				style.flexGrow === 1 &&
+				style.flexShrink === 0 &&
+				style.padding === 0 &&
+				typeof style.borderRadius === 'number'
+			const rowGroupSurface =
+				style?.backgroundColor ===
+					Tokens.default.colors.TABLEROW_BACKGROUND_DEFAULT &&
+				style.borderRadius ===
+					Tokens.default.modules.mobile.TABLE_ROW_BORDER_RADIUS &&
+				style.padding === Tokens.default.modules.mobile.TABLE_ROW_PADDING
+
+			if (!tableRowGroupSurface && !rowGroupSurface) return args
+
+			return [SegmentedGroupSurface, props, key]
+		}),
+	)
+}
+
 export function patchNamedComponents(
 	settings: Settings,
 	restores: Restore[],
@@ -230,8 +295,10 @@ export function patchNamedComponents(
 	const patches = NamedComponents.filter(([feature]) => settings[feature]).map(
 		([, name, wrap]) => patchComponentByName(name, wrap, restores, reportError),
 	)
-	if (settings.expressiveGroups)
+	patchSegmentedGroupSurface(restores)
+	if (settings.expressiveGroups) {
 		patches.push(patchActionSheetRowGroup(restores, reportError))
+	}
 	if (settings.expressiveHeaders)
 		patches.push(patchLeftAlignedHeaderTitle(restores))
 	if (settings.expressiveTabs) patchTabStyles(restores)
