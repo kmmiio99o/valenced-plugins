@@ -70,6 +70,31 @@ export function patchComponentByName(
 	)
 }
 
+export function replaceComponentByName(
+	name: string,
+	replacement: ComponentType<any>,
+	restores: Restore[],
+	reportError: (error: unknown) => void,
+) {
+	const patchedComponents = new Set<ComponentType<any>>()
+	return getModules(
+		withComponent(name),
+		exports => {
+			const module = exports as Exports
+			const key = componentName(module[name]) === name ? name : 'default'
+			const original = module[key] as ComponentType<any>
+			if (!patchedComponents.has(original)) {
+				patchedComponents.add(original)
+				restores.push(
+					beforeJSX(original, args => [replacement, args[1], args[2]]),
+				)
+			}
+			replaceExport(module, key, () => replacement, restores, reportError)
+		},
+		{ returnNamespace: true },
+	)
+}
+
 const NamedComponents = [
 	['expressiveButtons', 'ChannelActions', expressiveHeaderActions],
 	[

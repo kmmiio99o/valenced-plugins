@@ -3,12 +3,12 @@ import { getModules } from '@valenced/modules/finders'
 import { withProps } from '@valenced/modules/finders/filters'
 import { beforeJSX } from '@valenced/react/jsx-runtime'
 import { M3Radio, M3Switch } from '../../components'
-import { M3Fab } from '../../components/fab'
 import { segmented } from '../../components/groups'
 import { AccentTitle, tonalIcon } from '../../components/rows'
 import { expressiveHeaderAction } from '../../components/screens'
 import { patchChatInput } from './chatInput'
 import { replaceProperty } from './exports'
+import { patchFloatingActionButtons } from './floatingActionButtons'
 import { patchInputFields } from './inputFields'
 import { patchComponentByName, patchNamedComponents } from './named'
 import { patchSliders } from './sliders'
@@ -118,14 +118,7 @@ export function patchComponents(
 		cleanups.push(patchSliders(restores, reportError))
 	if (settings.expressiveChatInput) cleanups.push(patchChatInput())
 	if (settings.expressiveFloatingActionButtons)
-		cleanups.push(
-			patchComponentByName(
-				'FloatingActionButton',
-				() => M3Fab,
-				restores,
-				reportError,
-			),
-		)
+		cleanups.push(patchFloatingActionButtons(restores, reportError))
 	if (settings.expressiveRadioButtons)
 		cleanups.push(
 			patchComponentByName('FormRadio', () => M3Radio, restores, reportError),
