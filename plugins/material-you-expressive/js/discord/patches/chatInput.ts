@@ -1,20 +1,23 @@
 import { Tokens } from '@valenced/discord/common/tokens'
+import { getModules } from '@valenced/modules/finders'
+import { withProps } from '@valenced/modules/finders/filters'
 import { beforeJSX } from '@valenced/react/jsx-runtime'
 import {
 	cloneElement,
 	createElement,
 	forwardRef,
 	isValidElement,
-	useEffect,
 	useImperativeHandle,
 	useRef,
 	useState,
 } from 'react'
 import { StyleSheet, View } from 'react-native'
-import { color, Roles } from '../../components/colors'
-import { expressiveChatSendControl } from '../../components/screens'
-import type { ReactElement, ReactNode, Ref } from 'react'
+import type { ComponentType, ReactElement, ReactNode, Ref } from 'react'
 import type { StyleProp, ViewStyle } from 'react-native'
+
+type PressableOpacityModule = {
+	PressableOpacity: ComponentType<any>
+}
 
 interface ComposerProps {
 	children?: ReactNode
@@ -33,10 +36,21 @@ interface SendButtonHandle {
 	setHasText(value: boolean): void
 }
 
+let measuredSingleLineChatInputHeight: number | undefined
+
+function getSendControlSize(verticalPadding: number) {
+	return (
+		measuredSingleLineChatInputHeight ??
+		Tokens.default.modules.mobile.CHAT_INPUT_SEND_BUTTON_HEIGHT +
+			verticalPadding * 2
+	)
+}
+
 interface SendControlProps {
 	button: ReactElement<SendButtonProps>
 	size: number
 	measured: boolean
+	backgroundColor: ViewStyle['backgroundColor']
 }
 
 const styles = StyleSheet.create({
@@ -60,6 +74,8 @@ const styles = StyleSheet.create({
 		position: 'relative',
 		alignItems: 'center',
 		justifyContent: 'center',
+		flexGrow: 0,
+		flexShrink: 0,
 	},
 })
 
@@ -72,68 +88,54 @@ interface ComposerRowProps {
 	verticalPadding: number
 }
 
-function hasText(value: string | undefined) {
-	return typeof value === 'string' && value.trim().length > 0
-}
-
 const SendControl = forwardRef<SendButtonHandle, SendControlProps>(
-	({ button, size, measured }, ref) => {
-		const [sendMode, setSendMode] = useState(() =>
-			hasText(button.props.defaultValue),
-		)
+	({ button, size, measured, backgroundColor }, ref) => {
 		const innerRef = useRef<SendButtonHandle>(null)
-
-		useEffect(() => {
-			setSendMode(hasText(button.props.defaultValue))
-		}, [button.props.defaultValue])
 
 		useImperativeHandle(
 			ref,
 			() => ({
 				setHasText(value) {
 					innerRef.current?.setHasText(value)
-					setSendMode(value)
 				},
 			}),
 			[],
 		)
 
-		const showSend =
-			sendMode ||
-			button.props.hasPendingAttachments === true ||
-			button.props.hasPendingEdit === true
-		const backgroundColor = showSend
-			? color(['CHAT_INPUT_SEND_BUTTON_ACTIVE_BACKGROUND'], Roles.primary())
-			: Roles.secondaryContainer()
-
-		return expressiveChatSendControl(
-			size,
+		return createElement(
+			View,
+			{
+				pointerEvents: 'box-none',
+				style: [styles.sendControl, { width: size, height: size }],
+			},
+			createElement(View, {
+				pointerEvents: 'none',
+				style: [
+					StyleSheet.absoluteFill,
+					{
+						borderRadius: size / 2,
+						overflow: 'hidden',
+						backgroundColor,
+					},
+				],
+			}),
 			createElement(
 				View,
 				{
-					pointerEvents: 'box-none',
-					style: [
-						styles.sendControl,
-						{
-							width: size,
-							height: size,
-							borderRadius: size / 2,
-							backgroundColor,
-						},
-					],
-				},
-				createElement(
-					View,
-					{
-						pointerEvents: measured ? 'auto' : 'none',
-						accessibilityElementsHidden: !measured,
-						importantForAccessibility: measured
-							? 'auto'
-							: 'no-hide-descendants',
-						style: { opacity: measured ? 1 : 0 },
+					pointerEvents: measured ? 'auto' : 'none',
+					accessibilityElementsHidden: !measured,
+					importantForAccessibility: measured ? 'auto' : 'no-hide-descendants',
+					style: {
+						width: size,
+						height: size,
+						alignItems: 'center',
+						justifyContent: 'center',
+						opacity: measured ? 1 : 0,
 					},
-					cloneElement(button, { ref: innerRef }),
-				),
+				},
+				cloneElement(button, {
+					ref: innerRef,
+				}),
 			),
 		)
 	},
@@ -147,10 +149,7 @@ function ComposerRow({
 	horizontalPadding,
 	verticalPadding,
 }: ComposerRowProps) {
-	const [controlSize, setControlSize] = useState<number>(
-		Tokens.default.modules.mobile.CHAT_INPUT_SEND_BUTTON_HEIGHT +
-			verticalPadding * 2,
-	)
+	const sendControlSize = getSendControlSize(verticalPadding)
 	const [hasMeasuredComposer, setHasMeasuredComposer] = useState(false)
 	const children = (node.props.children as ReactNode[]).filter(
 		(_, index) => index !== sendIndex,
@@ -172,8 +171,8 @@ function ComposerRow({
 			onLayout: ({ nativeEvent }) => {
 				const { height } = nativeEvent.layout
 				if (height > 0) {
-					setControlSize(current => (current === height ? current : height))
-					setHasMeasuredComposer(true)
+					measuredSingleLineChatInputHeight ??= height
+					if (!hasMeasuredComposer) setHasMeasuredComposer(true)
 				}
 			},
 			style: [
@@ -183,7 +182,7 @@ function ComposerRow({
 					minWidth: 0,
 					paddingHorizontal: horizontalPadding,
 					paddingVertical: verticalPadding,
-					borderRadius: controlSize / 2,
+					borderRadius: sendControlSize / 2,
 					backgroundColor,
 				},
 			],
@@ -194,8 +193,9 @@ function ComposerRow({
 		key: sendButton.key ?? 'expressive-chat-send-control',
 		ref: sendButton.props.ref,
 		button: sendButton,
-		size: controlSize,
+		size: sendControlSize,
 		measured: hasMeasuredComposer,
+		backgroundColor,
 	})
 
 	return createElement(
@@ -217,6 +217,18 @@ function isNodeArray(node: ReactNode): node is ReactNode[] {
 function isSendButton(node: ReactNode): node is ReactElement<SendButtonProps> {
 	return (
 		isValidElement<SendButtonProps>(node) && 'canSendVoiceMessage' in node.props
+	)
+}
+
+function elementTypeName(node: unknown): string | undefined {
+	if (!isValidElement(node)) return
+	const type = node.type as {
+		displayName?: string
+		name?: string
+		type?: { displayName?: string; name?: string }
+	}
+	return (
+		type.displayName ?? type.name ?? type.type?.displayName ?? type.type?.name
 	)
 }
 
@@ -260,6 +272,31 @@ function restyleMainContents(
 }
 
 export function patchChatInput() {
+	const verticalPadding =
+		Tokens.default.modules.mobile.CHAT_INPUT_FLOATING_CONTENT_PADDING_VERTICAL
+	const sendButtonRestores: Array<() => void> = []
+	const unpatchSendButton = getModules(
+		withProps<PressableOpacityModule>('PressableOpacity'),
+		exports => {
+			const { PressableOpacity } = exports as PressableOpacityModule
+			sendButtonRestores.push(
+				beforeJSX(PressableOpacity, args => {
+					const [type, props, key] = args
+					const iconName = elementTypeName(props.children)
+					if (iconName !== 'SendMessageIcon' && iconName !== 'MicrophoneIcon')
+						return args
+					const size = getSendControlSize(verticalPadding)
+					const controlStyle = {
+						width: size,
+						height: size,
+						borderRadius: size / 2,
+					}
+					return [type, { ...props, style: [props.style, controlStyle] }, key]
+				}),
+			)
+		},
+		{ max: 1, returnNamespace: true },
+	)
 	const unpatchComposer = beforeJSX(View, args => {
 		const [type, props, key] = args
 		const nativeStyle = StyleSheet.flatten(props.style)
@@ -290,6 +327,8 @@ export function patchChatInput() {
 	})
 
 	return () => {
+		unpatchSendButton()
+		sendButtonRestores.forEach(restore => restore())
 		unpatchComposer()
 	}
 }

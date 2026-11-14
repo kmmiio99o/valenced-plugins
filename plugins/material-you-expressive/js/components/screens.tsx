@@ -15,7 +15,6 @@ type Component = ComponentType<Props>
 
 const Pill = 999
 const HeaderActionsContext = createContext(false)
-const ChatSendButtonSizeContext = createContext<number | undefined>(undefined)
 let guildShapesEnabled = false
 const guildShapeListeners = new Set<() => void>()
 
@@ -57,29 +56,10 @@ export const expressiveHeaderActions = (Actions: Component) =>
 		)
 	}
 
-export const expressiveChatSendControl = (size: number, children: ReactNode) =>
-	createElement(ChatSendButtonSizeContext.Provider, { value: size, children })
-
 /** Keep channel-header icon buttons compact and surface the channel search action. */
 export const expressiveHeaderAction = (Button: Component) =>
 	function ExpressiveHeaderAction(props: Props) {
 		const inHeaderActions = useContext(HeaderActionsContext)
-		const sendButtonSize = useContext(ChatSendButtonSizeContext)
-		if (sendButtonSize !== undefined) {
-			const radius = sendButtonSize / 2
-			return createElement(Button, {
-				...props,
-				style: [
-					props.style,
-					{
-						width: sendButtonSize,
-						height: sendButtonSize,
-						borderRadius: radius,
-						backgroundColor: 'transparent',
-					},
-				],
-			})
-		}
 		if (!inHeaderActions) return createElement(Button, props)
 
 		if (props.icon != null)
