@@ -2,17 +2,12 @@ import { Tokens } from '@valenced/discord/common/tokens'
 import { getModules } from '@valenced/modules/finders'
 import { withProps } from '@valenced/modules/finders/filters'
 import { beforeJSX } from '@valenced/react/jsx-runtime'
-import { StyleSheet, View } from 'react-native'
+import { StyleSheet } from 'react-native'
 import { M3Radio, M3Switch } from '../../components'
 import { M3Fab } from '../../components/fab'
 import { segmented } from '../../components/groups'
 import { AccentTitle, tonalIcon } from '../../components/rows'
-import {
-	expressiveHeaderAction,
-	expressiveYouBar,
-	expressiveYouBarBackground,
-	expressiveYouBarSurface,
-} from '../../components/screens'
+import { expressiveHeaderAction } from '../../components/screens'
 import { patchChatInput } from './chatInput'
 import { replaceProperty } from './exports'
 import { patchComponentByName, patchNamedComponents } from './named'
@@ -94,43 +89,6 @@ function patchExpressivePressables(restores: Restore[]) {
 	)
 }
 
-function patchExpressiveYouBar(
-	cleanups: (() => void)[],
-	restores: Restore[],
-	reportError: (error: unknown) => void,
-) {
-	cleanups.push(
-		patchComponentByName(
-			'YouBarThemed',
-			expressiveYouBar,
-			restores,
-			reportError,
-		),
-		patchComponentByName(
-			'YouBarBackground',
-			expressiveYouBarBackground,
-			restores,
-			reportError,
-		),
-	)
-	const YouBarSurface = expressiveYouBarSurface(View)
-	restores.push(
-		beforeJSX(View, args => {
-			const [, props, key] = args
-			const style = StyleSheet.flatten(props.style)
-			const barSurface =
-				style?.borderWidth === 1 &&
-				style.borderColor === Tokens.default.colors.BORDER_MUTED
-			const barButton =
-				style?.position === 'relative' &&
-				style.overflow === 'hidden' &&
-				(style.borderRadius === 8 || style.borderRadius === 12)
-			if (!barSurface && !barButton) return args
-			return [YouBarSurface, props, key]
-		}),
-	)
-}
-
 function patchCardRadius(restores: Restore[]) {
 	return getModules(
 		withProps<{
@@ -159,7 +117,6 @@ export function patchComponents(
 	cleanups.push(patchExpressiveTextFields(restores, reportError))
 	if (settings.expressiveButtons || settings.expressiveChatInput)
 		cleanups.push(patchExpressivePressables(restores))
-	patchExpressiveYouBar(cleanups, restores, reportError)
 	if (settings.expressiveCorners) cleanups.push(patchCardRadius(restores))
 	if (settings.expressiveGroups) {
 		cleanups.push(

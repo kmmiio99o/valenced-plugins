@@ -8,7 +8,6 @@ type RadiusTokens = {
 		radii: Radii
 		modules: {
 			button: { BORDER_RADIUS: number; BORDER_RADIUS_LG: number }
-			mobile: { YOU_BAR_BORDER_RADIUS: number }
 		}
 	}
 	RawColor: unknown
@@ -48,12 +47,6 @@ export function patchRadii(
 					button.BORDER_RADIUS_LG = originalButton.borderRadiusLg
 				})
 			}
-			const mobile = tokens.default.modules.mobile
-			const originalYouBarRadius = mobile.YOU_BAR_BORDER_RADIUS
-			mobile.YOU_BAR_BORDER_RADIUS = 999
-			cleanup(() => {
-				mobile.YOU_BAR_BORDER_RADIUS = originalYouBarRadius
-			})
 		}),
 	)
 }

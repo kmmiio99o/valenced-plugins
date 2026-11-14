@@ -2,7 +2,6 @@ import { Design } from '@valenced/discord/design'
 import {
 	createContext,
 	createElement,
-	forwardRef,
 	isValidElement,
 	useContext,
 	useSyncExternalStore,
@@ -16,7 +15,6 @@ type Component = ComponentType<Props>
 
 const Pill = 999
 const HeaderActionsContext = createContext(false)
-const YouBarContext = createContext(false)
 const ChatSendButtonSizeContext = createContext<number | undefined>(undefined)
 let guildShapesEnabled = false
 const guildShapeListeners = new Set<() => void>()
@@ -59,41 +57,8 @@ export const expressiveHeaderActions = (Actions: Component) =>
 		)
 	}
 
-/** Keep Discord's YouBar intact and scope its custom shape to native descendants. */
-export const expressiveYouBar = (YouBar: Component) =>
-	function ExpressiveYouBar(props: Props) {
-		return (
-			<YouBarContext.Provider value>
-				<YouBar {...props} />
-			</YouBarContext.Provider>
-		)
-	}
-
 export const expressiveChatSendControl = (size: number, children: ReactNode) =>
 	createElement(ChatSendButtonSizeContext.Provider, { value: size, children })
-
-export const expressiveYouBarBackground = (Background: Component) =>
-	function ExpressiveYouBarBackground(props: Props) {
-		return createElement(
-			View,
-			{
-				pointerEvents: 'none',
-				style: [StyleSheet.absoluteFill, styles.youBarBackground],
-			},
-			createElement(Background, props),
-		)
-	}
-
-export const expressiveYouBarSurface = (Surface: Component) =>
-	forwardRef<unknown, Props>(function ExpressiveYouBarSurface(props, ref) {
-		const inYouBar = useContext(YouBarContext)
-		// Avoid re-entering the beforeJSX(View) hook with its replacement element.
-		return createElement(Surface, {
-			...props,
-			ref,
-			style: [props.style, inYouBar ? styles.youBarSurface : null],
-		})
-	})
 
 /** Keep channel-header icon buttons compact and surface the channel search action. */
 export const expressiveHeaderAction = (Button: Component) =>
@@ -196,14 +161,6 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		justifyContent: 'center',
 	},
-	youBarSurface: {
-		borderRadius: Pill,
-		borderTopLeftRadius: Pill,
-		borderTopRightRadius: Pill,
-		borderBottomLeftRadius: Pill,
-		borderBottomRightRadius: Pill,
-	},
-	youBarBackground: { borderRadius: Pill, overflow: 'hidden' },
 	card: {
 		marginHorizontal: 8,
 		paddingVertical: RowGap,
