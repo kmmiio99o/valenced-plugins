@@ -1,3 +1,4 @@
+import { Tokens } from '@valenced/discord/common/tokens'
 import { Design } from '@valenced/discord/design'
 import {
 	createContext,
@@ -7,7 +8,7 @@ import {
 	useSyncExternalStore,
 } from 'react'
 import { StyleSheet, View } from 'react-native'
-import { color } from './colors'
+import { color, withAlpha } from './colors'
 import type { ComponentType, ReactNode } from 'react'
 
 type Props = Record<string, any>
@@ -99,27 +100,43 @@ export const largeTitle = () =>
 		)
 	}
 
-const RowGap = 2
+const MessageRowSurfaceContext = createContext(false)
 
-/** Each DM as a rounded card, a little apart from the next. */
-export const cardRow = (Row: Component) =>
-	function CardRow(props: Props) {
-		const height = typeof props.height === 'number' ? props.height : undefined
-
+export const messageRowSurface = (Row: Component) =>
+	function MessageRowSurface(props: Props) {
 		return (
-			<View
-				style={[
-					styles.card,
-					height !== undefined && { height },
-					{ backgroundColor: Surface() },
-				]}
-			>
-				<Row
-					{...props}
-					height={height !== undefined ? height - RowGap * 2 : props.height}
-				/>
-			</View>
+			<MessageRowSurfaceContext.Provider value>
+				<Row {...props} />
+			</MessageRowSurfaceContext.Provider>
 		)
+	}
+
+export const expressiveMessageRowPressable = (Button: Component) =>
+	function ExpressiveMessageRowPressable(props: Props) {
+		const inMessageRow = useContext(MessageRowSurfaceContext)
+		if (!inMessageRow) return createElement(Button, props)
+
+		const style = StyleSheet.flatten(props.style)
+		if (style?.backgroundColor != null) return createElement(Button, props)
+
+		const radius =
+			style?.borderRadius ??
+			Tokens.default.modules.mobile.TABLE_ROW_BORDER_RADIUS
+		const tintLayer = createElement(View, {
+			pointerEvents: 'none',
+			style: [
+				StyleSheet.absoluteFill,
+				{
+					borderRadius: radius,
+					backgroundColor: withAlpha(Surface(), 0.62),
+				},
+			],
+		})
+		return createElement(Button, {
+			...props,
+			style: [props.style, { position: 'relative', borderRadius: radius }],
+			children: [tintLayer, props.children],
+		})
 	}
 
 /** Servers are circles, the selected one morphs into a rounded square. */
@@ -139,13 +156,6 @@ const styles = StyleSheet.create({
 		padding: 4,
 		borderRadius: Pill,
 		alignItems: 'center',
-		justifyContent: 'center',
-	},
-	card: {
-		marginHorizontal: 8,
-		paddingVertical: RowGap,
-		borderRadius: 20,
-		overflow: 'hidden',
 		justifyContent: 'center',
 	},
 })

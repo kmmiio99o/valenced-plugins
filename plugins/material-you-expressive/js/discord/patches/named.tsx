@@ -9,10 +9,10 @@ import { StyleSheet, View } from 'react-native'
 import { Roles, withAlpha } from '../../components/colors'
 import { SegmentedGroupSurface, segmented } from '../../components/groups'
 import {
-	cardRow,
 	expressiveHeaderAction,
 	expressiveHeaderActions,
 	largeTitle,
+	messageRowSurface,
 	setGuildShapesEnabled,
 	shapedGuild,
 } from '../../components/screens'
@@ -106,7 +106,7 @@ const NamedComponents = [
 	['expressiveButtons', 'IconActionButton', expressiveHeaderAction],
 	['expressiveTabs', 'SegmentedControlItem', expressiveSegment],
 	['expressiveHeaders', 'GenericHeaderTitle', largeTitle],
-	['expressiveMessageRows', 'MessagesItemChannelBase', cardRow],
+	['expressiveMessageRows', 'MessagesItemChannelBase', messageRowSurface],
 ] as const
 
 const GuildsBarComponent = 'GuildsBarAnimatedItemWrapper'
