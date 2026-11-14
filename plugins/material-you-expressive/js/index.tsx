@@ -8,15 +8,19 @@ import type { Settings } from './settings/types'
 
 export default plugin<{ jsonStorage: Settings }>({
 	jsonStorage: { load: true, default: readSettings({}) },
-	preInit({ plugin: self }) {
+	async preInit({ cleanup, unscoped, plugin: self }) {
 		if (self.startedLate) self.requireReload()
-	},
-	init({ cleanup, jsonStorage }) {
-		const settings = readSettings(jsonStorage.cache)
+
+		const storage = unscoped.jsonStorage.getJsonStorage<Settings>(
+			unscoped.jsonStorage.pluginStoragePathFor(self.manifest.id),
+			{ default: readSettings({}) },
+		)
+		const settings = readSettings(await storage.get())
 		if (settings.expressiveCorners) patchRadii(cleanup)
-		cleanup(patchComponents(settings))
+		cleanup(patchComponents(settings, error => self.reportError(error)))
 	},
-	start({ cleanup, jsonStorage, plugin: self }) {
+	async start({ cleanup, jsonStorage, plugin: self }) {
+		if (!jsonStorage.loaded) await jsonStorage.get()
 		const initialSettings = readSettings(jsonStorage.cache)
 		let avatarShapes = initialSettings.avatarShapes
 		let guildShapes = initialSettings.expressiveGuilds

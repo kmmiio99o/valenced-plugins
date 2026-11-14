@@ -22,11 +22,15 @@ const withNativeSliderComponent = createFilterGenerator<[]>(
 	() => 'native-slider-component',
 )()
 
-export function patchSliders(restores: Restore[]) {
+export function patchSliders(
+	restores: Restore[],
+	reportError: (error: unknown) => void,
+) {
 	const cleanups = [
 		getModules(
 			withProps<Exports>('Slider'),
-			exports => replaceExport(exports, 'Slider', () => M3Slider, restores),
+			exports =>
+				replaceExport(exports, 'Slider', () => M3Slider, restores, reportError),
 			{ max: 4 },
 		),
 		getModules(
@@ -47,6 +51,7 @@ export function patchSliders(restores: Restore[]) {
 							),
 						),
 					restores,
+					reportError,
 				),
 			{ max: 1, returnNamespace: true },
 		),

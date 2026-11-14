@@ -1,59 +1,246 @@
+import { Tokens } from '@valenced/discord/common/tokens'
 import { getModules } from '@valenced/modules/finders'
-import { withName } from '@valenced/modules/finders/filters'
+import {
+	createFilterGenerator,
+	withProps,
+} from '@valenced/modules/finders/filters'
+import { beforeJSX } from '@valenced/react/jsx-runtime'
+import { StyleSheet, View } from 'react-native'
+import { Roles, withAlpha } from '../../components/colors'
 import { segmented } from '../../components/groups'
 import {
 	cardRow,
 	largeTitle,
 	pillButton,
-	pillTab,
 	setGuildShapesEnabled,
 	shapedGuild,
 	tonalActions,
 } from '../../components/screens'
-import { replaceExport } from './exports'
+import { replaceExport, replaceProperty } from './exports'
+import type { ComponentType } from 'react'
 import type { Settings } from '../../settings/types'
 import type { Exports, Restore } from './exports'
+
+type Component = {
+	displayName?: string
+	name?: string
+	render?: unknown
+	type?: unknown
+}
+
+function componentName(component: unknown): string | undefined {
+	if (typeof component === 'function')
+		return (component as Component).displayName ?? component.name
+	if (!component || typeof component !== 'object') return
+
+	const candidate = component as Component
+	return (
+		candidate.displayName ??
+		componentName(candidate.render) ??
+		componentName(candidate.type)
+	)
+}
+
+const withComponent = createFilterGenerator<[name: string]>(
+	([name], _id, exports) => {
+		if (!exports || typeof exports !== 'object') return false
+		const module = exports as Record<string, unknown>
+		return (
+			componentName(module[name]) === name ||
+			componentName(module.default) === name
+		)
+	},
+	([name]) => `material-you-expressive.component(${name})`,
+)
+
+export function patchComponentByName(
+	name: string,
+	wrap: (original: ComponentType<any>) => ComponentType<any>,
+	restores: Restore[],
+	reportError: (error: unknown) => void,
+) {
+	return getModules(
+		withComponent(name),
+		exports => {
+			const module = exports as Exports
+			const key = componentName(module[name]) === name ? name : 'default'
+			replaceExport(module, key, wrap, restores, reportError)
+		},
+		{ returnNamespace: true },
+	)
+}
 
 const NamedComponents = [
 	['expressiveButtons', 'BaseButton', pillButton],
 	['expressiveButtons', 'BaseTextButton', pillButton],
 	['expressiveButtons', 'PrivateChannelButtons', tonalActions],
-	['expressiveButtons', 'ChannelActionButtons', tonalActions],
-	['expressiveHeaders', 'LeftAlignedHeaderTitle', largeTitle],
+	['expressiveButtons', 'ChannelActions', tonalActions],
 	['expressiveHeaders', 'GenericHeaderTitle', largeTitle],
 	['expressiveMessageRows', 'MessagesItemChannelBase', cardRow],
-	['expressiveTabs', 'TabItem', pillTab],
-	['expressiveGroups', 'ActionSheetRowGroup', segmented],
 ] as const
 
 const GuildsBarComponent = 'GuildsBarAnimatedItemWrapper'
+const ExpressiveHeaderTitle = largeTitle()
 
-export function patchNamedComponents(settings: Settings, restores: Restore[]) {
+function patchTabStyles(restores: Restore[]) {
+	const segmentedControlBackground =
+		Tokens.default.colors.MOBILE_SEGMENTED_CONTROL_BACKGROUND
+	const segmentedControlIndicator =
+		Tokens.default.colors.MOBILE_SEGMENTED_CONTROL_INDICATOR_BACKGROUND
+
+	restores.push(
+		beforeJSX(View, args => {
+			const [type, props, key] = args
+			const style = StyleSheet.flatten(props.style)
+
+			if (
+				style?.position === 'absolute' &&
+				style.width === '100%' &&
+				style.height === '100%' &&
+				style.flexDirection === 'row' &&
+				(style.borderRadius != null || style.alignItems === 'flex-end')
+			)
+				return [type, { ...props, pointerEvents: 'none' }, key]
+
+			if (
+				style?.height === 2 &&
+				style.borderTopStartRadius != null &&
+				style.borderTopEndRadius != null
+			)
+				return [
+					type,
+					{
+						...props,
+						pointerEvents: 'none',
+						style: [
+							props.style,
+							{
+								height: '100%',
+								backgroundColor: withAlpha(Roles.primary(), 0.16),
+								borderRadius: 999,
+							},
+						],
+					},
+					key,
+				]
+
+			if (
+				style?.display === 'flex' &&
+				style.flexDirection === 'row' &&
+				style.alignItems === 'center' &&
+				style.paddingVertical != null &&
+				style.borderRadius != null &&
+				style.backgroundColor === segmentedControlBackground
+			)
+				return [
+					type,
+					{
+						...props,
+						style: [
+							props.style,
+							{
+								backgroundColor: Roles.surfaceHighest(),
+								borderRadius: 24,
+							},
+						],
+					},
+					key,
+				]
+
+			if (
+				style?.flex === 1 &&
+				style.borderRadius != null &&
+				style.backgroundColor === segmentedControlIndicator
+			)
+				return [
+					type,
+					{
+						...props,
+						style: [
+							props.style,
+							{
+								backgroundColor: withAlpha(Roles.primary(), 0.16),
+								borderRadius: 20,
+							},
+						],
+					},
+					key,
+				]
+
+			return args
+		}),
+	)
+}
+
+function patchLeftAlignedHeaderTitle(restores: Restore[]) {
+	return getModules(
+		withProps<{ Heading: ComponentType<any> }>('Heading'),
+		exports => {
+			restores.push(
+				beforeJSX(exports.Heading, args => {
+					const [, props, key] = args
+					if (
+						props.variant !== 'redesign/heading-18/bold' ||
+						props.color !== 'mobile-text-heading-primary' ||
+						props.lineClamp !== 1
+					)
+						return args
+
+					return [ExpressiveHeaderTitle, { title: props.children }, key]
+				}),
+			)
+		},
+		{ max: 1 },
+	)
+}
+
+function patchActionSheetRowGroup(
+	restores: Restore[],
+	reportError: (error: unknown) => void,
+) {
+	return getModules(
+		withProps<Exports>('ActionSheetRow'),
+		exports => {
+			const module = exports as unknown as Exports
+			const actionSheetRow = module.ActionSheetRow as
+				| (ComponentType<any> & { Group?: ComponentType<any> })
+				| undefined
+			const group = actionSheetRow?.Group
+			if (!group || componentName(group) !== 'ActionSheetRowGroup') return
+			if (
+				!replaceProperty(
+					actionSheetRow as unknown as Exports,
+					'Group',
+					segmented(group),
+					restores,
+				)
+			)
+				reportError(new Error('Cannot replace ActionSheetRow.Group export.'))
+		},
+		{ returnNamespace: true },
+	)
+}
+
+export function patchNamedComponents(
+	settings: Settings,
+	restores: Restore[],
+	reportError: (error: unknown) => void,
+) {
 	setGuildShapesEnabled(settings.expressiveGuilds)
 	const patches = NamedComponents.filter(([feature]) => settings[feature]).map(
-		([, name, wrap]) =>
-			getModules(
-				withName(name),
-				exports => {
-					const module = exports as unknown as Exports
-					if ((module.default as { name?: string } | undefined)?.name === name)
-						replaceExport(module, 'default', wrap, restores)
-				},
-				{ returnNamespace: true },
-			),
+		([, name, wrap]) => patchComponentByName(name, wrap, restores, reportError),
 	)
+	if (settings.expressiveGroups)
+		patches.push(patchActionSheetRowGroup(restores, reportError))
+	if (settings.expressiveHeaders)
+		patches.push(patchLeftAlignedHeaderTitle(restores))
+	if (settings.expressiveTabs) patchTabStyles(restores)
 	patches.push(
-		getModules(
-			withName(GuildsBarComponent),
-			exports => {
-				const module = exports as unknown as Exports
-				if (
-					(module.default as { name?: string } | undefined)?.name ===
-					GuildsBarComponent
-				)
-					replaceExport(module, 'default', shapedGuild, restores)
-			},
-			{ returnNamespace: true },
+		patchComponentByName(
+			GuildsBarComponent,
+			shapedGuild,
+			restores,
+			reportError,
 		),
 		() => setGuildShapesEnabled(false),
 	)

@@ -6,8 +6,8 @@ import { M3Fab } from '../../components/fab'
 import { segmented } from '../../components/groups'
 import { AccentTitle, tonalIcon } from '../../components/rows'
 import { patchChatInput } from './chatInput'
-import { replaceExport } from './exports'
-import { patchNamedComponents } from './named'
+import { replaceExport, replaceProperty } from './exports'
+import { patchComponentByName, patchNamedComponents } from './named'
 import { patchSliders } from './sliders'
 import type { ComponentType } from 'react'
 import type { Settings } from '../../settings/types'
@@ -15,7 +15,10 @@ import type { Exports, Restore } from './exports'
 
 const Pill = 999
 
-export function patchComponents(settings: Settings) {
+export function patchComponents(
+	settings: Settings,
+	reportError: (error: unknown) => void,
+) {
 	const restores: Restore[] = []
 	const cleanups: (() => void)[] = []
 
@@ -30,55 +33,32 @@ export function patchComponents(settings: Settings) {
 							<Button cornerRadius={Pill} {...props} ref={ref} />
 						)),
 					restores,
+					reportError,
 				),
 			),
 		)
 	if (settings.expressiveGroups) {
 		cleanups.push(
-			getModules(
-				withProps<Exports>('TableRowGroup'),
-				exports => replaceExport(exports, 'TableRowGroup', segmented, restores),
-				{ max: 4 },
-			),
-		)
-		cleanups.push(
-			getModules(
-				withProps<Exports>('RowGroup', 'RowGroupProps'),
-				exports => replaceExport(exports, 'RowGroup', segmented, restores),
-				{ max: 4 },
-			),
+			patchComponentByName('TableRowGroup', segmented, restores, reportError),
+			patchComponentByName('RowGroup', segmented, restores, reportError),
 		)
 	}
 	if (settings.expressiveSwitches)
 		cleanups.push(
-			getModules(
-				withProps<Exports>('FormSwitch'),
-				exports =>
-					replaceExport(exports, 'FormSwitch', () => M3Switch, restores),
-				{ max: 4 },
-			),
+			patchComponentByName('FormSwitch', () => M3Switch, restores, reportError),
 		)
 	if (settings.expressiveRowTitles)
 		cleanups.push(
-			getModules(
-				withProps<Exports>('TableRowGroupTitle'),
-				exports =>
-					replaceExport(
-						exports,
-						'TableRowGroupTitle',
-						() => AccentTitle,
-						restores,
-					),
-				{ max: 4 },
+			patchComponentByName(
+				'TableRowGroupTitle',
+				() => AccentTitle,
+				restores,
+				reportError,
 			),
 		)
 	if (settings.expressiveRowIcons) {
 		cleanups.push(
-			getModules(
-				withProps<Exports>('TableRowIcon'),
-				exports => replaceExport(exports, 'TableRowIcon', tonalIcon, restores),
-				{ max: 4 },
-			),
+			patchComponentByName('TableRowIcon', tonalIcon, restores, reportError),
 		)
 		cleanups.push(
 			getModules(
@@ -86,34 +66,36 @@ export function patchComponents(settings: Settings) {
 				({ TableRow }) => {
 					const original = TableRow.Icon
 					if (!original) return
-					TableRow.Icon = tonalIcon(original)
-					restores.push(() => {
-						TableRow.Icon = original
-					})
+					if (
+						!replaceProperty(
+							TableRow as unknown as Exports,
+							'Icon',
+							tonalIcon(original),
+							restores,
+						)
+					)
+						reportError(new Error('Cannot replace TableRow.Icon export.'))
 				},
 			),
 		)
 	}
-	if (settings.expressiveSliders) cleanups.push(patchSliders(restores))
+	if (settings.expressiveSliders)
+		cleanups.push(patchSliders(restores, reportError))
 	if (settings.expressiveChatInput) cleanups.push(patchChatInput())
 	if (settings.expressiveFloatingActionButtons)
 		cleanups.push(
-			getModules(
-				withProps<Exports>('FloatingActionButton', 'FloatingActionButtonProps'),
-				exports =>
-					replaceExport(exports, 'FloatingActionButton', () => M3Fab, restores),
-				{ max: 4 },
+			patchComponentByName(
+				'FloatingActionButton',
+				() => M3Fab,
+				restores,
+				reportError,
 			),
 		)
 	if (settings.expressiveRadioButtons)
 		cleanups.push(
-			getModules(
-				withProps<Exports>('FormRadio'),
-				exports => replaceExport(exports, 'FormRadio', () => M3Radio, restores),
-				{ max: 4 },
-			),
+			patchComponentByName('FormRadio', () => M3Radio, restores, reportError),
 		)
-	cleanups.push(...patchNamedComponents(settings, restores))
+	cleanups.push(...patchNamedComponents(settings, restores, reportError))
 
 	return () => {
 		for (const cleanup of cleanups) cleanup()

@@ -1,7 +1,7 @@
 import { Design } from '@valenced/discord/design'
 import { useSyncExternalStore } from 'react'
 import { StyleSheet, View } from 'react-native'
-import { color, Roles, withAlpha } from './colors'
+import { color } from './colors'
 import type { ComponentType, ReactNode } from 'react'
 
 type Props = Record<string, any>
@@ -83,24 +83,6 @@ export const cardRow = (Row: Component) =>
 		)
 	}
 
-/** The selected tab sits on a pill. */
-export const pillTab = (Tab: Component) =>
-	function PillTab(props: Props) {
-		return (
-			<View
-				style={[
-					styles.tab,
-					props.grow && styles.grow,
-					props.selected && {
-						backgroundColor: withAlpha(Roles.primary(), 0.16),
-					},
-				]}
-			>
-				<Tab {...props} />
-			</View>
-		)
-	}
-
 /** Servers are circles, the selected one morphs into a rounded square. */
 export const shapedGuild = (Item: Component) =>
 	function ShapedGuild(props: Props) {
@@ -125,6 +107,4 @@ const styles = StyleSheet.create({
 		overflow: 'hidden',
 		justifyContent: 'center',
 	},
-	tab: { borderRadius: 20, overflow: 'hidden' },
-	grow: { flexGrow: 1 },
 })

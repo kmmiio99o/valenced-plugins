@@ -44,7 +44,7 @@ export default function SettingsPage({ api }: Props) {
 	) => {
 		try {
 			await api.jsonStorage.set({ [key]: enabled })
-			api.plugin.requireReload()
+			if (key !== 'expressiveGuilds') api.plugin.requireReload()
 		} catch (error) {
 			api.plugin.reportError(error)
 		}
@@ -67,7 +67,7 @@ export default function SettingsPage({ api }: Props) {
 						<TableSwitchRow
 							key={key}
 							label={label}
-							subLabel="Reload the plugin to apply this feature."
+							subLabel="Reload Discord to apply this feature."
 							value={settings[key]}
 							onValueChange={value => updateFeature(key, value)}
 						/>
@@ -78,7 +78,11 @@ export default function SettingsPage({ api }: Props) {
 						<TableSwitchRow
 							key={key}
 							label={label}
-							subLabel="Reload the plugin to apply this feature."
+							subLabel={
+								key === 'expressiveGuilds'
+									? 'Applied immediately.'
+									: 'Reload Discord to apply this feature.'
+							}
 							value={settings[key]}
 							onValueChange={value => updateFeature(key, value)}
 						/>
