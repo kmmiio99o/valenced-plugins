@@ -2,7 +2,6 @@ import { Tokens } from '@valenced/discord/common/tokens'
 import { getModules } from '@valenced/modules/finders'
 import { withProps } from '@valenced/modules/finders/filters'
 import { beforeJSX } from '@valenced/react/jsx-runtime'
-import { StyleSheet } from 'react-native'
 import { M3Radio, M3Switch } from '../../components'
 import { M3Fab } from '../../components/fab'
 import { segmented } from '../../components/groups'
@@ -10,68 +9,15 @@ import { AccentTitle, tonalIcon } from '../../components/rows'
 import { expressiveHeaderAction } from '../../components/screens'
 import { patchChatInput } from './chatInput'
 import { replaceProperty } from './exports'
+import { patchInputFields } from './inputFields'
 import { patchComponentByName, patchNamedComponents } from './named'
 import { patchSliders } from './sliders'
 import type { ComponentType } from 'react'
-import type { StyleProp, ViewStyle } from 'react-native'
 import type { Settings } from '../../settings/types'
 import type { Exports, Restore } from './exports'
 
-type InputFieldStyles = {
-	background: StyleProp<ViewStyle>
-	minHeight: StyleProp<ViewStyle>
-	radius: StyleProp<ViewStyle>
-	[key: string]: unknown
-}
-
-type InputFieldModule = {
-	InputFieldContainer: ComponentType<any>
-	useInputStyles: (options: {
-		size?: string
-		round?: boolean
-		disabled?: boolean
-		grow?: boolean
-		hasLeadingIcon?: boolean
-	}) => InputFieldStyles
-}
-
 type PressablesModule = {
 	PressableOpacity: ComponentType<any>
-}
-
-function patchExpressiveTextFields(
-	restores: Restore[],
-	reportError: (error: unknown) => void,
-) {
-	return getModules(
-		withProps<InputFieldModule>('InputFieldContainer', 'useInputStyles'),
-		exports => {
-			const module = exports as Exports
-			const { useInputStyles } = exports as InputFieldModule
-			if (
-				!replaceProperty(
-					module,
-					'useInputStyles',
-					(options: Parameters<InputFieldModule['useInputStyles']>[0]) => {
-						const styles = useInputStyles(options)
-						return {
-							...styles,
-							background: {
-								...StyleSheet.flatten(styles.background),
-								backgroundColor: 'transparent',
-							},
-							minHeight: { minHeight: 56 },
-							radius: { borderRadius: Tokens.default.radii.lg },
-						}
-					},
-					restores,
-				)
-			)
-				reportError(
-					new Error('Cannot replace InputFieldContainer.useInputStyles.'),
-				)
-		},
-	)
 }
 
 function patchExpressivePressables(restores: Restore[]) {
@@ -114,7 +60,7 @@ export function patchComponents(
 	const restores: Restore[] = []
 	const cleanups: (() => void)[] = []
 
-	cleanups.push(patchExpressiveTextFields(restores, reportError))
+	cleanups.push(patchInputFields(restores))
 	if (settings.expressiveButtons || settings.expressiveChatInput)
 		cleanups.push(patchExpressivePressables(restores))
 	if (settings.expressiveCorners) cleanups.push(patchCardRadius(restores))
