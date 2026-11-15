@@ -1,4 +1,5 @@
 import { Design } from '@valenced/discord/design'
+import { Clipboard } from '@valenced/externals/react-native-clipboard'
 import { modules } from '../../common'
 import { StickerFormat } from '../../types'
 import { copyStickerAsImage, downloadSticker } from '../../utils/imageActions'
@@ -50,11 +51,29 @@ export default function StickerActions({ sticker }: { sticker: StickerNode }) {
 				}}
 			/>
 			{imageSticker && (
+				<Button
+					text="Clone"
+					onPress={() => openExpressionStealer({ kind: 'sticker', sticker })}
+				/>
+			)}
+			<Button
+				text="Copy URL"
+				onPress={() => {
+					const url = modules.stickerUtils?.getStickerAssetUrl(sticker)
+					if (!url) {
+						showToast(
+							'EXPRESSION_UTILS_COPY_URL',
+							'Sticker URL is unavailable.',
+							'critical',
+						)
+						return
+					}
+					Clipboard.setString(url)
+					showToast('EXPRESSION_UTILS_COPY_URL', 'URL copied.')
+				}}
+			/>
+			{imageSticker && (
 				<>
-					<Button
-						text="Clone"
-						onPress={() => openExpressionStealer({ kind: 'sticker', sticker })}
-					/>
 					<Button
 						text="Download as image"
 						onPress={() => void downloadSticker(sticker)}
