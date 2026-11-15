@@ -13,5 +13,9 @@ node_modules/
 .DS_Store
 .idea/
 *.iml
+.agents/
+.codex/
+.omd/
+.vscode/
 discord-apk/
 discord-mobile-datamining/
