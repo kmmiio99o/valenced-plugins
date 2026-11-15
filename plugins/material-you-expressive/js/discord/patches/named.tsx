@@ -104,50 +104,12 @@ const NamedComponents = [
 	],
 	['expressiveButtons', 'IconButton', expressiveHeaderAction],
 	['expressiveButtons', 'IconActionButton', expressiveHeaderAction],
-	['expressiveTabs', 'SegmentedControlItem', expressiveSegment],
 	['expressiveHeaders', 'GenericHeaderTitle', largeTitle],
 	['expressiveMessageRows', 'MessagesItemChannelBase', messageRowSurface],
 ] as const
 
 const GuildsBarComponent = 'GuildsBarAnimatedItemWrapper'
 const ExpressiveHeaderTitle = largeTitle()
-
-function expressiveSegment(Item: ComponentType<any>) {
-	return function ExpressiveSegment(props: Record<string, any>) {
-		const { index, itemCount } = props
-		if (
-			typeof index !== 'number' ||
-			typeof itemCount !== 'number' ||
-			itemCount < 1
-		)
-			return <Item {...props} />
-
-		const first = index === 0
-		const last = index === itemCount - 1
-		const outerRadius = Tokens.default.radii.lg
-		const innerRadius = Tokens.default.radii.sm
-
-		return (
-			<Item
-				{...props}
-				style={[
-					props.style,
-					{
-						borderColor: withAlpha(Roles.outline(), 0.32),
-						borderTopWidth: 1,
-						borderBottomWidth: 1,
-						borderStartWidth: 1,
-						borderEndWidth: last ? 1 : 0,
-						borderTopStartRadius: first ? outerRadius : innerRadius,
-						borderBottomStartRadius: first ? outerRadius : innerRadius,
-						borderTopEndRadius: last ? outerRadius : innerRadius,
-						borderBottomEndRadius: last ? outerRadius : innerRadius,
-					},
-				]}
-			/>
-		)
-	}
-}
 
 function patchTabStyles(restores: Restore[]) {
 	const segmentedControlBackground =
@@ -170,28 +132,6 @@ function patchTabStyles(restores: Restore[]) {
 				return [type, { ...props, pointerEvents: 'none' }, key]
 
 			if (
-				style?.height === 2 &&
-				style.borderTopStartRadius != null &&
-				style.borderTopEndRadius != null
-			)
-				return [
-					type,
-					{
-						...props,
-						pointerEvents: 'none',
-						style: [
-							props.style,
-							{
-								height: '100%',
-								backgroundColor: withAlpha(Roles.primary(), 0.16),
-								borderRadius: 999,
-							},
-						],
-					},
-					key,
-				]
-
-			if (
 				style?.display === 'flex' &&
 				style.flexDirection === 'row' &&
 				style.alignItems === 'center' &&
@@ -207,6 +147,9 @@ function patchTabStyles(restores: Restore[]) {
 							props.style,
 							{
 								backgroundColor: Roles.surfaceHighest(),
+								borderColor: withAlpha(Roles.outline(), 0.32),
+								borderWidth: 1,
+								paddingHorizontal: 2,
 							},
 						],
 					},
@@ -225,7 +168,7 @@ function patchTabStyles(restores: Restore[]) {
 						style: [
 							props.style,
 							{
-								backgroundColor: Roles.secondaryContainer(),
+								backgroundColor: withAlpha(Roles.primary(), 0.16),
 							},
 						],
 					},
