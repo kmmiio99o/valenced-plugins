@@ -61,7 +61,7 @@
       "author": "kmmiio99o <879393496627306587> (https://github.com/sponsors/kmmiio99o \"Donations\") (https://kmmiio99o.dev \"Website\") (https://github.com/kmmiio99o \"GitHub\")",
       "icon": "EmojiSmilingFacewithHeartsIcon",
       "channels": {
-        "latest": "1.0.4"
+        "latest": "1.0.5"
       },
       "versions": {
         "1.0.0": {
@@ -128,6 +128,19 @@
               "version": "*"
             }
           }
+        },
+        "1.0.5": {
+          "url": "https://kmmiio99o.github.io/valenced-plugins/pool/dev.kmmiio99o.expression-utils@1.0.5.zip",
+          "sha256": "db5f0fe9bbf2e8a0fcddfb825adb745c26022d7263450b026032e47018aadd5c",
+          "size": 26262,
+          "dependencies": {
+            "valenced.api": {
+              "version": ">=1 <2"
+            },
+            "discord": {
+              "version": "*"
+            }
+          }
         }
       }
     },
@@ -164,7 +177,7 @@
       ],
       "icon": "PaintPaletteIcon",
       "channels": {
-        "latest": "0.6.0"
+        "latest": "0.6.1"
       },
       "versions": {
         "0.4.1": {
@@ -184,6 +197,19 @@
           "url": "https://kmmiio99o.github.io/valenced-plugins/pool/dev.kmmiio99o.material-you-expressive@0.6.0.zip",
           "sha256": "d910401cb14324513e31a3ac433e8be5ec3141e3230d4207a0dd27c1f340eca3",
           "size": 22828,
+          "dependencies": {
+            "valenced.api": {
+              "version": ">=1 <2"
+            },
+            "discord": {
+              "version": ">=352.2"
+            }
+          }
+        },
+        "0.6.1": {
+          "url": "https://kmmiio99o.github.io/valenced-plugins/pool/dev.kmmiio99o.material-you-expressive@0.6.1.zip",
+          "sha256": "55588b306de2d684122104c82119e939ea2c3096903022aec950eafac1e259ea",
+          "size": 22659,
           "dependencies": {
             "valenced.api": {
               "version": ">=1 <2"
