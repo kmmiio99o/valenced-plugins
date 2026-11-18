@@ -177,7 +177,7 @@
       ],
       "icon": "PaintPaletteIcon",
       "channels": {
-        "latest": "0.6.1"
+        "latest": "0.6.2"
       },
       "versions": {
         "0.4.1": {
@@ -210,6 +210,19 @@
           "url": "https://kmmiio99o.github.io/valenced-plugins/pool/dev.kmmiio99o.material-you-expressive@0.6.1.zip",
           "sha256": "55588b306de2d684122104c82119e939ea2c3096903022aec950eafac1e259ea",
           "size": 22659,
+          "dependencies": {
+            "valenced.api": {
+              "version": ">=1 <2"
+            },
+            "discord": {
+              "version": ">=352.2"
+            }
+          }
+        },
+        "0.6.2": {
+          "url": "https://kmmiio99o.github.io/valenced-plugins/pool/dev.kmmiio99o.material-you-expressive@0.6.2.zip",
+          "sha256": "56d7f73b02ca51b05658e6888413c95d80a49715bc5a53d4d8e6bde721ddf8ed",
+          "size": 22663,
           "dependencies": {
             "valenced.api": {
               "version": ">=1 <2"
