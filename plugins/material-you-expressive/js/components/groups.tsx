@@ -65,10 +65,11 @@ export function segmented(Group: ComponentType<any>) {
 	}
 
 	return function SegmentedGroup(props: GroupProps) {
+		const parentCorners = useContext(SegmentCornersContext)
 		const { title, description, children, ...rest } = props
 		const rows = Children.toArray(children).filter(isValidElement)
 
-		if (!rows.length) return <Group {...props} />
+		if (parentCorners || !rows.length) return <Group {...props} />
 
 		const { Text } = Design as unknown as {
 			Text: ComponentType<{
