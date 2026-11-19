@@ -22,7 +22,9 @@ val expressionUtils = plugin {
 			val (url, fileName) = args.toImageArgs()
 			val activity = awaitAppActivity()
 			storagePermission.ensureGranted(activity)
-			val image = copyImageToClipboard(activity, url, fileName)
+			val image = withContext(Dispatchers.IO) {
+				copyImageToClipboard(activity, url, fileName)
+			}
 			mapOf("uri" to image.uri.toString(), "bytes" to image.bytes)
 		}
 
@@ -34,26 +36,6 @@ val expressionUtils = plugin {
 				downloadImageToDownloads(activity, url, fileName)
 			}
 			mapOf("uri" to image.uri.toString(), "bytes" to image.bytes)
-		}
-
-		registerNativeAsyncMethod("${manifest.id}.stageStickerImage") { args ->
-			val (url, fileName) = args.toImageArgs()
-			val activity = awaitAppActivity()
-			val image = withContext(Dispatchers.IO) {
-				stageStickerImageForUpload(activity, url, fileName)
-			}
-			mapOf(
-				"uri" to image.uri.toString(),
-				"fileName" to image.fileName,
-				"mimeType" to image.mimeType,
-				"bytes" to image.bytes,
-			)
-		}
-
-		registerNativeAsyncMethod("${manifest.id}.deleteStagedStickerImage") { args ->
-			val argv = args.asDelegate()
-			val uri by argv.string()
-			deleteStagedStickerImage(awaitAppActivity(), uri)
 		}
 	}
 

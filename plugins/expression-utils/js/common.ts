@@ -23,7 +23,28 @@ interface StickerCreationActions {
 }
 
 interface StickerUtils {
-	getStickerAssetUrl(sticker: { id: string; format_type: number }): string
+	getStickerAssetUrl(
+		sticker: { id: string; format_type: number },
+		options?: { isPreview?: boolean; size?: number },
+	): string
+	// Disambiguates StickersUtils from the Sticker.tsx preview wrapper.
+	getStickerFormatTypeFromFileType(fileType: string): number
+	getFilenameForSticker(sticker: { name: string; format_type: number }): string
+}
+
+// Discord's FileManagerUtils wrapper.
+interface FileManagerUtils {
+	writeFile(
+		directory: 'cache' | 'documents' | 'shared',
+		path: string,
+		data: string,
+		encoding: 'base64' | 'utf8',
+	): Promise<string>
+	removeFile(
+		directory: 'cache' | 'documents' | 'shared',
+		path: string,
+	): Promise<unknown>
+	clearFolder(directory: 'cache' | 'documents' | 'shared', path: string): Promise<unknown>
 }
 
 interface FavoriteStickerHooks {
@@ -54,6 +75,7 @@ export const modules: {
 		getStickerById(id: string): Partial<StickerNode> | undefined
 	}
 	stickerDetailSheet?: StickerDetailSheet
+	fileManagerUtils?: FileManagerUtils
 } = {}
 
 export function initializeStickerDetailSheet(moduleId: number) {
@@ -96,9 +118,16 @@ export function findExpressionModules() {
 				modules.stickerCreationActions = value
 			},
 		),
-		getModules(withProps<StickerUtils>('getStickerAssetUrl'), value => {
-			modules.stickerUtils = value
-		}),
+		getModules(
+			withProps<StickerUtils>(
+				'getStickerAssetUrl',
+				'getStickerFormatTypeFromFileType',
+				'getFilenameForSticker',
+			),
+			value => {
+				modules.stickerUtils = value
+			},
+		),
 		getModules(
 			withProps<FavoriteStickerHooks>(
 				'useFavoriteStickerIds',
@@ -123,6 +152,16 @@ export function findExpressionModules() {
 			),
 			value => {
 				modules.stickerStore = value
+			},
+		),
+		getModules(
+			withProps<FileManagerUtils>(
+				'writeFile',
+				'removeFile',
+				'clearFolder',
+			),
+			value => {
+				modules.fileManagerUtils = value
 			},
 		),
 	]

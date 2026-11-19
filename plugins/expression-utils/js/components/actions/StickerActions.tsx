@@ -1,5 +1,7 @@
+import { ActionSheetActionCreators } from '@valenced/discord/actions'
 import { Design } from '@valenced/discord/design'
 import { Clipboard } from '@valenced/externals/react-native-clipboard'
+import { Platform } from 'react-native'
 import { modules } from '../../common'
 import { StickerFormat } from '../../types'
 import { copyStickerAsImage, downloadSticker } from '../../utils/imageActions'
@@ -76,7 +78,11 @@ export default function StickerActions({ sticker }: { sticker: StickerNode }) {
 				<>
 					<Button
 						text="Download as image"
-						onPress={() => void downloadSticker(sticker)}
+						onPress={() => {
+							// Dismiss the sheet so it doesn't cover the share sheet.
+							if (Platform.OS === 'ios') ActionSheetActionCreators.hideActionSheet()
+							void downloadSticker(sticker)
+						}}
 					/>
 					<Button
 						text="Copy as image"

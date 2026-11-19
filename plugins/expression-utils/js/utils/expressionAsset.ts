@@ -16,7 +16,9 @@ const mimeByExtension: Record<string, string> = {
 
 export function getExpressionAsset(sticker: StickerNode) {
 	const extension = extensionByFormat[sticker.format_type]
-	const url = modules.stickerUtils?.getStickerAssetUrl(sticker)
+	const url = modules.stickerUtils?.getStickerAssetUrl(sticker, {
+		isPreview: false,
+	})
 	if (!url || !extension) throw new Error('Unsupported sticker asset.')
 
 	return {
