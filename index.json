@@ -59,9 +59,12 @@
       "name": "Expression Utils",
       "description": "Adds useful actions to custom emoji and sticker sheets, including cloning expressions to servers you manage.",
       "author": "kmmiio99o <879393496627306587> (https://github.com/sponsors/kmmiio99o \"Donations\") (https://kmmiio99o.dev \"Website\") (https://github.com/kmmiio99o \"GitHub\")",
+      "contributors": [
+        "Livie <755950362342457384>"
+      ],
       "icon": "EmojiSmilingFacewithHeartsIcon",
       "channels": {
-        "latest": "1.0.5"
+        "latest": "1.0.6"
       },
       "versions": {
         "1.0.0": {
@@ -133,6 +136,19 @@
           "url": "https://kmmiio99o.github.io/valenced-plugins/pool/dev.kmmiio99o.expression-utils@1.0.5.zip",
           "sha256": "db5f0fe9bbf2e8a0fcddfb825adb745c26022d7263450b026032e47018aadd5c",
           "size": 26262,
+          "dependencies": {
+            "valenced.api": {
+              "version": ">=1 <2"
+            },
+            "discord": {
+              "version": "*"
+            }
+          }
+        },
+        "1.0.6": {
+          "url": "https://kmmiio99o.github.io/valenced-plugins/pool/dev.kmmiio99o.expression-utils@1.0.6.zip",
+          "sha256": "fbd81a3dd8f813c6f60256c3dcf8b7df52ad6da7b1a91beac28630d6508200e6",
+          "size": 24093,
           "dependencies": {
             "valenced.api": {
               "version": ">=1 <2"
