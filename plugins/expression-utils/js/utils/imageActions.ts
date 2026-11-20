@@ -1,4 +1,6 @@
+import { Platform } from 'react-native'
 import { getExpressionAsset } from './expressionAsset'
+import { copyImageIos, downloadImageIos } from './iosImageActions'
 import { copyImage, downloadImage } from './native'
 import { showToast } from './toasts'
 import type { EmojiNode, StickerNode } from '../types'
@@ -15,7 +17,11 @@ function errorText(error: unknown) {
 async function copyImageAction(resolve: () => ImageRequest) {
 	try {
 		const { url, fileName } = resolve()
-		await copyImage(url, fileName)
+		if (Platform.OS === 'ios') {
+			await copyImageIos(url)
+		} else {
+			await copyImage(url, fileName)
+		}
 		showToast(
 			'EXPRESSION_UTILS_COPY_IMAGE',
 			'Image copied',
@@ -46,6 +52,14 @@ export function copyStickerAsImage(sticker: StickerNode) {
 async function downloadImageAction(resolve: () => ImageRequest) {
 	try {
 		const { url, fileName } = resolve()
+		if (Platform.OS === 'ios') {
+			await downloadImageIos(url, fileName)
+			showToast(
+				'EXPRESSION_UTILS_DOWNLOAD',
+				'Choose "Save Image" in the share sheet.',
+			)
+			return
+		}
 		await downloadImage(url, fileName)
 		showToast('EXPRESSION_UTILS_DOWNLOAD', 'Image saved to Downloads.')
 	} catch (error) {

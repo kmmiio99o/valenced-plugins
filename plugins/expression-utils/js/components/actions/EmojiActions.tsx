@@ -1,5 +1,7 @@
+import { ActionSheetActionCreators } from '@valenced/discord/actions'
 import { Design } from '@valenced/discord/design'
 import { Clipboard } from '@valenced/externals/react-native-clipboard'
+import { Platform } from 'react-native'
 import { copyAsImage, downloadEmoji } from '../../utils/imageActions'
 import { showToast } from '../../utils/toasts'
 import { openExpressionStealer } from '../ExpressionStealerActionSheet'
@@ -33,7 +35,10 @@ export default function EmojiActions({ emoji }: { emoji: EmojiNode }) {
 			/>
 			<Button
 				text="Download as image"
-				onPress={() => void downloadEmoji(emoji)}
+				onPress={() => {
+					if (Platform.OS === 'ios') ActionSheetActionCreators.hideActionSheet()
+					void downloadEmoji(emoji)
+				}}
 			/>
 			<Button
 				text="Copy as image"

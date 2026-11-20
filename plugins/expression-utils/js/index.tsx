@@ -16,6 +16,7 @@ export default plugin({
 				modules.emojiSlotUtils = undefined
 				modules.stickerStore = undefined
 				modules.stickerDetailSheet = undefined
+				modules.fileManagerUtils = undefined
 			},
 			...findExpressionModules(),
 			...findEmojiUploadModules(),

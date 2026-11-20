@@ -1,7 +1,7 @@
 import { modules } from '../common'
 import { StickerFormat } from '../types'
 import { getExpressionAsset } from './expressionAsset'
-import { deleteStagedStickerImage, stageStickerImage } from './native'
+import { deleteStagedStickerImage, stageStickerImage } from './stickerImage'
 import { showToast } from './toasts'
 import type { StickerNode } from '../types'
 
@@ -46,6 +46,7 @@ export async function uploadSticker(
 		staged = await stageStickerImage(
 			asset.url,
 			`sticker-${sticker.id}.${asset.extension}`,
+			asset.mimeType,
 		)
 		showToast('EXPRESSION_UTILS_STICKER_UPLOADING', 'Uploading sticker...')
 		await actions.createGuildSticker({
@@ -72,7 +73,7 @@ export async function uploadSticker(
 	} finally {
 		if (staged) {
 			try {
-				await deleteStagedStickerImage(staged.uri)
+				await deleteStagedStickerImage(staged)
 			} catch (error) {
 				showToast(
 					'EXPRESSION_UTILS_UPLOAD_STICKER_CLEANUP',
