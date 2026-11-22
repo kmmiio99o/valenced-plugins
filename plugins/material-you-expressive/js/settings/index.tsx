@@ -23,6 +23,7 @@ function SettingsGroup({
 		TableRowGroupContext: Context<boolean>
 	}
 	const rows = Children.toArray(children).filter(isValidElement)
+	const radius = Tokens.default.radii.lg
 	return (
 		<View style={{ marginBottom: Tokens.default.space.PX_16 }}>
 			<AccentTitle title={title} />
@@ -33,7 +34,10 @@ function SettingsGroup({
 						style={[
 							styles.rowSurface,
 							{
-								borderRadius: Tokens.default.radii.lg,
+								borderTopLeftRadius: index === 0 ? radius : 0,
+								borderTopRightRadius: index === 0 ? radius : 0,
+								borderBottomLeftRadius: index === rows.length - 1 ? radius : 0,
+								borderBottomRightRadius: index === rows.length - 1 ? radius : 0,
 								backgroundColor: Tokens.default.colors.CARD_MUTED_BG,
 							},
 						]}
@@ -63,6 +67,7 @@ const Features: { key: FeatureKey; label: string }[] = [
 	{ key: 'expressiveMessageRows', label: 'Message rows' },
 	{ key: 'expressiveTabs', label: 'Tabs' },
 	{ key: 'expressiveGuilds', label: 'Server icons' },
+	{ key: 'expressiveAlertModals', label: 'Alert dialogs' },
 ]
 
 export default function SettingsPage({ api }: Props) {

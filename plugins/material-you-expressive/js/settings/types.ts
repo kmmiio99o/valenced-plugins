@@ -14,6 +14,7 @@ export interface Settings {
 	expressiveMessageRows: boolean
 	expressiveTabs: boolean
 	expressiveGuilds: boolean
+	expressiveAlertModals: boolean
 }
 
 export const DefaultSettings: Settings = {
@@ -32,6 +33,7 @@ export const DefaultSettings: Settings = {
 	expressiveMessageRows: true,
 	expressiveTabs: true,
 	expressiveGuilds: true,
+	expressiveAlertModals: true,
 }
 
 export function readSettings(value: object | undefined): Settings {
@@ -62,5 +64,6 @@ export function readSettings(value: object | undefined): Settings {
 		expressiveMessageRows: readBoolean('expressiveMessageRows', featureDefault),
 		expressiveTabs: readBoolean('expressiveTabs', featureDefault),
 		expressiveGuilds: readBoolean('expressiveGuilds', featureDefault),
+		expressiveAlertModals: readBoolean('expressiveAlertModals', featureDefault),
 	}
 }

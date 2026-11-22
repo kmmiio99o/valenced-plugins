@@ -11,6 +11,7 @@ import {
 	expressiveHeaderAction,
 	expressiveMessageRowPressable,
 } from '../../components/screens'
+import { patchAlertModal } from './alertModal'
 import { patchChatInput } from './chatInput'
 import { replaceProperty } from './exports'
 import { patchFloatingActionButtons } from './floatingActionButtons'
@@ -219,6 +220,8 @@ export function patchComponents(
 		cleanups.push(
 			patchComponentByName('FormRadio', () => M3Radio, restores, reportError),
 		)
+	if (settings.expressiveAlertModals)
+		cleanups.push(patchAlertModal(restores, reportError))
 	cleanups.push(...patchNamedComponents(settings, restores, reportError))
 
 	return () => {

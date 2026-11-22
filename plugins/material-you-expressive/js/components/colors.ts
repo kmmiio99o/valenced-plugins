@@ -25,8 +25,17 @@ export function withAlpha(hex: string, alpha: number) {
 	)
 }
 
+function resolveColor(name: string) {
+	const { colors, internal } = Tokens.default
+	return internal.resolveSemanticColor(
+		(Stores.ThemeStore as ThemeStore).theme,
+		colors[name],
+	)
+}
+
 export const Roles = {
 	primary: () => color(['BACKGROUND_BRAND'], '#80d5c8'),
+	primaryText: () => resolveColor('TEXT_BRAND'),
 	danger: () =>
 		color(
 			['TEXT_FEEDBACK_CRITICAL', 'TEXT_DANGER', 'STATUS_DANGER'],
@@ -40,6 +49,7 @@ export const Roles = {
 		color(['INTERACTIVE_NORMAL', 'TEXT_MUTED', 'ICON_DEFAULT'], '#bdc9c6'),
 	surfaceHighest: () =>
 		color(['BACKGROUND_SURFACE_HIGHEST', 'BACKGROUND_MOD_STRONG'], '#2f3635'),
+	surfaceHigh: () => resolveColor('BACKGROUND_SURFACE_HIGH'),
 	secondaryContainer: () =>
 		color(['BACKGROUND_SURFACE_HIGH', 'BACKGROUND_MOD_SUBTLE'], '#242b2a'),
 }
