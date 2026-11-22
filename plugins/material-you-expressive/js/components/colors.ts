@@ -36,6 +36,7 @@ function resolveColor(name: string) {
 export const Roles = {
 	primary: () => color(['BACKGROUND_BRAND'], '#80d5c8'),
 	primaryText: () => resolveColor('TEXT_BRAND'),
+	dangerText: () => resolveColor('TEXT_FEEDBACK_CRITICAL'),
 	danger: () =>
 		color(
 			['TEXT_FEEDBACK_CRITICAL', 'TEXT_DANGER', 'STATUS_DANGER'],

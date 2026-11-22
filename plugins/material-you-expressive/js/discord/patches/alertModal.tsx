@@ -544,7 +544,9 @@ export function patchAlertModal(
 									style={[
 										styles.actionLabel,
 										{
-											color: destructive ? Roles.danger() : Roles.primaryText(),
+											color: destructive
+												? Roles.dangerText()
+												: Roles.primaryText(),
 										},
 									]}
 								>
@@ -572,7 +574,7 @@ export function patchAlertModal(
 								const variant = useContext(AlertActionColor)
 								if (variant == null) return color
 								return variant === 'destructive'
-									? Roles.danger()
+									? Roles.dangerText()
 									: Roles.primaryText()
 							}),
 						)
