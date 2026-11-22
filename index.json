@@ -2,6 +2,7 @@
   "format": 1,
   "name": "kmmiio99o Plugins Repository",
   "description": "kmmiio99o plugin repository from Valenced.",
+  "icon": "StarOutlineIcon",
   "plugins": {
     "dev.kmmiio99o.cloud.sync": {
       "name": "CloudSync",
@@ -284,6 +285,32 @@
               "version": ">=1 <2"
             },
             "discord": {
+              "version": "*"
+            }
+          }
+        }
+      }
+    },
+    "dev.zaveqo.midnight-vencord": {
+      "name": "Midnight Vencord",
+      "description": "A Gruvbox-inspired midnight dark theme.",
+      "author": "kmmiio99o <879393496627306587> (https://github.com/sponsors/kmmiio99o \"Donations\") (https://kmmiio99o.dev \"Website\") (https://github.com/kmmiio99o \"GitHub\")",
+      "channels": {
+        "latest": "1.0.0"
+      },
+      "versions": {
+        "1.0.0": {
+          "url": "https://kmmiio99o.github.io/valenced-plugins/pool/dev.zaveqo.midnight-vencord@1.0.0.zip",
+          "sha256": "c5858f211588f38eb675dcd42b0ddc986f57345ce96b84ebbb6ab1da8aded1f6",
+          "size": 3181,
+          "dependencies": {
+            "valenced.api": {
+              "version": ">=1 <2"
+            },
+            "discord": {
+              "version": "*"
+            },
+            "valenced.api.themes": {
               "version": "*"
             }
           }
