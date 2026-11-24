@@ -1,0 +1,29 @@
+name: Plugin Feature Request
+description: Suggest a feature for a plugin!
+title: "[Plugin Name] Short feature description"
+labels: [enhancement]
+body:
+    - type: markdown
+      attributes:
+          value: |
+              ## Thanks for taking the time to suggest a feature! Make sure to fill in the issue title.
+    - type: checkboxes
+      attributes:
+          label: Check all the boxes below
+          options:
+              - label: I have checked that this hasn't already been suggested
+                required: true
+    - type: textarea
+      id: elaborate
+      attributes:
+          label: Elaborate
+          description: A more detailed description of your feature
+      validations:
+          required: true
+    - type: textarea
+      id: alternatives
+      attributes:
+          label: Alternatives
+          description: Any alternative solutions or features you have considered
+      validations:
+          required: false

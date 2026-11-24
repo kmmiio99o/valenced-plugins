@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Valenced documentation
+    url: https://github.com/Valenced/valenced-docs
+    about: Check the docs before opening an issue.
+  - name: Community support (Valenced Discord)
+    url: https://discord.gg/valenced
+    about: Ask questions in #plugin-help before filing a bug.
