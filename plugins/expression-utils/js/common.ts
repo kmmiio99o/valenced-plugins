@@ -57,6 +57,10 @@ interface EmojiSlotUtils {
 	getTotalStickerCountForTier(guild: Guild): number
 }
 
+interface AvatarUtils {
+	getEmojiURL(options: { id: string; animated: boolean; size: number }): string
+}
+
 interface StickerDetailSheet {
 	showStickerDetailActionSheet(options: {
 		renderableSticker: unknown
@@ -71,6 +75,7 @@ export const modules: {
 	stickerUtils?: StickerUtils
 	favoriteStickerHooks?: FavoriteStickerHooks
 	emojiSlotUtils?: EmojiSlotUtils
+	avatarUtils?: AvatarUtils
 	stickerStore?: {
 		getStickerById(id: string): Partial<StickerNode> | undefined
 	}
@@ -146,6 +151,9 @@ export function findExpressionModules() {
 				modules.emojiSlotUtils = value
 			},
 		),
+		getModules(withProps<AvatarUtils>('getEmojiURL'), value => {
+			modules.avatarUtils = value
+		}),
 		getModules(
 			withProps<{ getStickerById(id: string): Partial<StickerNode> }>(
 				'getStickerById',
