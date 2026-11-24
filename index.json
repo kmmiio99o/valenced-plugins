@@ -65,7 +65,7 @@
       ],
       "icon": "EmojiSmilingFacewithHeartsIcon",
       "channels": {
-        "latest": "1.0.6"
+        "latest": "1.1.0"
       },
       "versions": {
         "1.0.0": {
@@ -150,6 +150,19 @@
           "url": "https://kmmiio99o.github.io/valenced-plugins/pool/dev.kmmiio99o.expression-utils@1.0.6.zip",
           "sha256": "fbd81a3dd8f813c6f60256c3dcf8b7df52ad6da7b1a91beac28630d6508200e6",
           "size": 24093,
+          "dependencies": {
+            "valenced.api": {
+              "version": ">=1 <2"
+            },
+            "discord": {
+              "version": "*"
+            }
+          }
+        },
+        "1.1.0": {
+          "url": "https://kmmiio99o.github.io/valenced-plugins/pool/dev.kmmiio99o.expression-utils@1.1.0.zip",
+          "sha256": "e059cfe92087b1293e9b5044e54dd0e0a20a8737adc538b3ff26aa655d851f9c",
+          "size": 25125,
           "dependencies": {
             "valenced.api": {
               "version": ">=1 <2"
