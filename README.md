@@ -24,3 +24,4 @@ This repository is a **plugin repository**. Each plugin becomes one ZIP file, an
 | Name | Description | Authors | ID | Version |
 | --- | --- | --- | --- | --- |
 | [Midnight Vencord](themes/midnight-vencord) | A Gruvbox-inspired midnight dark theme. | kmmiio99o <879393496627306587> (https://github.com/sponsors/kmmiio99o "Donations") (https://kmmiio99o.dev "Website") (https://github.com/kmmiio99o "GitHub") | `dev.zaveqo.midnight-vencord` | 1.0.0 |
+| [Plumpy](themes/plumpy) | Replaces Discord's icons with ones from the Plumpy icon pack. | kmmiio99o <879393496627306587> (https://github.com/sponsors/kmmiio99o "Donations") (https://kmmiio99o.dev "Website") (https://github.com/kmmiio99o "GitHub"), Rairof (https://github.com/Rairof "Plumpy icon pack") | `dev.zaveqo.plumpy` | 1.0.0 |
